@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Portal - Submitted Papers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      scroll-behavior: smooth;
+    }
+    
+    .paper-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+    }
+    
+    .paper-card:hover {
+      border-left: 4px solid #3b82f6;
+      transform: translateX(5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .filter-button.active {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    .search-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    
+    .pagination-button {
+      transition: all 0.2s ease;
+    }
+    
+    .pagination-button:hover:not(.active) {
+      background-color: #e5e7eb;
+    }
+    
+    .pagination-button.active {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    footer {
+      background-color: #1e3a8a;
+      color: white;
+      padding: 2rem 0;
+    }
+    
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+    
+    .status-published {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-unpublished {
+      background-color: #fef3c7;
+       color: #b91c1c;
+    }
+    
+    
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 50;
+      overflow-y: auto;
+    }
+    
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background-color: white;
+      border-radius: 0.5rem;
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalFadeIn 0.3s;
+    }
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #pdf-preview-container {
+      min-height: 400px;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow px-10 py-10">
+    <div class="container mx-auto flex justify-between items-center py-4 px-6">
+      <h1 class="text-2xl font-bold text-blue-600">Research Portal</h1>
+      <div class="flex items-center">
+        <nav class="mr-6">
+          <ul class="flex space-x-6 text-lg">
+            <li><a href="index.html" class="hover:text-blue-500">Home</a></li>
+            <li><a href="papers.html" class="text-blue-600">Papers</a></li>
+            <li><a href="guide.html" class="hover:text-blue-500">Guidelines</a></li>
+            <li><a href="contact.html" class="hover:text-blue-500">Contact</a></li>
+          </ul>
+        </nav>
+        <a href="submit.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Submit Paper</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative py-20 bg-gradient-to-r from-blue-50 to-indigo-50">
+    <div class="absolute inset-0 opacity-10">
+      <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <pattern id="pattern-circles" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
+          <circle id="pattern-circle" cx="10" cy="10" r="2" fill="#3b82f6"></circle>
+        </pattern>
+        <rect id="rect" x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)"></rect>
+      </svg>
+    </div>
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-blue-800 mb-6">Submitted Research Papers</h1>
+        <p class="text-xl text-gray-700">Browse through our collection of submitted research papers across various academic disciplines.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search and Filter Section -->
+  <section class="py-10 bg-white border-b">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <!-- Search Bar -->
+        <div class="w-full md:w-1/3">
+          <div class="relative">
+            <input type="text" id="search-input" placeholder="Search papers by title, author, or keywords" class="search-input w-full px-4 py-3 pl-12 border border-gray-300 rounded-md focus:outline-none">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="flex flex-wrap gap-2">
+          <button class="filter-button active px-4 py-2 rounded-md bg-gray-100 text-gray-700 text-sm font-medium" data-filter="all">All Papers</button>
+          <button class="filter-button px-4 py-2 rounded-md bg-gray-100 text-gray-700 text-sm font-medium" data-filter="published">Published</button>
+          <button class="filter-button px-4 py-2 rounded-md bg-gray-100 text-gray-700 text-sm font-medium" data-filter="unpublished">unpublished</button>
+        </div>
+        
+        <!-- Sort By -->
+        <div class="w-full md:w-auto">
+          <select id="sort-by" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 bg-white">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="az">A-Z</option>
+            <option value="za">Z-A</option>
+            <option value="citations">Most Cited</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Papers List Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-6">
+      <!-- Category Tabs -->
+      <div class="mb-10 border-b border-gray-200 overflow-x-auto whitespace-nowrap pb-2">
+        <button class="category-tab inline-block px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-600" data-category="all">All Categories</button>
+        <button class="category-tab inline-block px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-category="biology">Biology & Medicine</button>
+        <button class="category-tab inline-block px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-category="computer-science">Computer Science</button>
+        <button class="category-tab inline-block px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-category="statistical-finance">Statistical Finance</button>
+        <button class="category-tab inline-block px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-category="social-sciences">Social Sciences</button>
+        <button class="category-tab inline-block px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-category="engineering">Engineering</button>
+        <button class="category-tab inline-block px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-category="human-computer-interaction">Human Computer Interaction</button>
+        <button class="category-tab inline-block px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-category="environmental">Environmental Science</button>
+      </div>
+      
+      <!-- Papers Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12" id="papers-container">
+        <!-- Paper 1 -->
+        <div class="paper-card bg-white p-6 rounded-lg shadow-sm" data-status="published" data-category="biology" data-title="Advances in Gene Therapy for Rare Diseases" data-date="2023-06-15" data-citations="42">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-blue-800">Advances in Gene Therapy for Rare Diseases</h3>
+            <span class="status-badge status-published">Published</span>
+          </div>
+          <div class="mb-4">
+            <p class="text-gray-600 mb-2"><strong>Authors:</strong> Dr. Fatima Rahman (Department of Genetic Engineering, DU),Dr. Arif Hassan (Bangabandhu Sheikh Mujib Medical University),Dr.Nusrat Jahan (Sylhet MAG Osmani Medical College)</p>
+            <p class="text-gray-600 mb-2"><strong>Institution:</strong> Chittagong Medical College</p>
+            <p class="text-gray-600"><strong>Date Submitted:</strong> June 15, 2025</p>
+          </div>
+          <p class="text-gray-700 mb-4">A groundbreaking study on novel gene therapy approaches for treating rare genetic disorders, focusing on delivery mechanisms and clinical outcomes.</p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Gene Therapy</span>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Rare Diseases</span>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Clinical Trials</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-gray-600 text-sm"><i class="fas fa-eye mr-1"></i> 1,245 views</span>
+              <span class="text-gray-600 text-sm ml-4"><i class="fas fa-download mr-1"></i> 328 downloads</span>
+              <span class="text-gray-600 text-sm ml-4"><i class="fas fa-quote-right mr-1"></i> 42 citations</span>
+            </div>
+            <button class="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" data-paper-id="1">View Paper</button>
+          </div>
+        </div>
+        
+        <!-- Paper 2 -->
+        <div class="paper-card bg-white p-6 rounded-lg shadow-sm" data-status="unpublished" data-category="statistical-finance" data-title="Quantum Computing: Breaking New Barriers" data-date="2023-07-03" data-citations="0">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-blue-800">Advancing Exchange Rate Forecasting: Leveraging
+Machine Learning and AI for Enhanced Accuracy in
+Global Financial Markets</h3>
+            <span class="status-badge status-unpublished">unpublished</span>
+          </div>
+          <div class="mb-4">
+            <p class="text-gray-600 mb-2"><strong>Authors:</strong>Md. Yeasin Rahat, Rajan Das Gupta, Nur Raisa Rahman, Sudipto Roy Pritom, Samiur Rahman Shakir, Md Imrul Hasan Showmick, Md. Jakir Hossen</p>
+            <p class="text-gray-600 mb-2"><strong>Institution:</strong>American International University-Bangladesh
+Dhaka, Bangladesh</p>
+            <p class="text-gray-600"><strong>Date Submitted:</strong> 11 June, 2025</p>
+          </div>
+          <p class="text-gray-700 mb-4">This paper explores the integration of machine learning and AI techniques in enhancing the accuracy of exchange rate forecasting, with a focus on the Bangladeshi market.</p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Exchange Rate Forecasting</span>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Machine Learning</span>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">AI</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-gray-600 text-sm"><i class="fas fa-eye mr-1"></i> 876 views</span>
+              <span class="text-gray-600 text-sm ml-4"><i class="fas fa-download mr-1"></i> 0 downloads</span>
+              <span class="text-gray-600 text-sm ml-4"><i class="fas fa-quote-right mr-1"></i> 0 citations</span>
+            </div>
+            <button class="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" data-paper-id="2">View Paper</button>
+          </div>
+        </div>
+        
+        <!-- Paper 3 -->
+        <div class="paper-card bg-white p-6 rounded-lg shadow-sm" data-status="published" data-category="social-sciences" data-title="The Impact of Social Media on Mental Health" data-date="2023-05-22" data-citations="31">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-blue-800">The Impact of Social Media on Mental Health</h3>
+            <span class="status-badge status-published">Published</span>
+          </div>
+          <div class="mb-4">
+            <p class="text-gray-600 mb-2"><strong>Authors:</strong> Dr. Mohammad Ali (Bangabandhu Sheikh Mujibur Rahman Agricultural University),Prof. Salma Begum (Khulna University),Dr. Anika Tabassum (Patuakhali Science and Technology University)</p>
+            <p class="text-gray-600 mb-2"><strong>Institution:</strong> Stanford University</p>
+            <p class="text-gray-600"><strong>Date Submitted:</strong> May 22, 2023</p>
+          </div>
+          <p class="text-gray-700 mb-4">A comprehensive analysis of how social media usage affects psychological well-being, with a focus on adolescents and young adults.</p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Social Media</span>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Mental Health</span>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Psychology</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-gray-600 text-sm"><i class="fas fa-eye mr-1"></i> 2,103 views</span>
+              <span class="text-gray-600 text-sm ml-4"><i class="fas fa-download mr-1"></i> 567 downloads</span>
+              <span class="text-gray-600 text-sm ml-4"><i class="fas fa-quote-right mr-1"></i> 31 citations</span>
+            </div>
+            <button class="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" data-paper-id="3">View Paper</button>
+          </div>
+        </div>
+        
+       <!-- Paper 4 - Bangladeshi Version -->
+<div class="paper-card bg-white p-6 rounded-lg shadow-sm" data-status="unpublished" data-category="computer-science" data-title="Cultural Impact on Requirements Engineering Activities: Bangladeshi Practitioners' View" data-date="2023-07-10" data-citations="0">
+  <div class="flex justify-between items-start mb-4">
+    <h3 class="text-xl font-semibold text-blue-800">Cultural Impact on Requirements Engineering Activities: Bangladeshi Practitioners' View</h3>
+    <span class="status-badge status-unpublished">unpublished</span>
+  </div>
+  <div class="mb-4">
+    <p class="text-gray-600 mb-2"><strong>Authors:</strong>  Chowdhury Shahriar Muzammel, Maria Spichkova, James Harland</p>
+    <p class="text-gray-600 mb-2"><strong>Institution:</strong> RMIT University, Australia
+</p>
+    <p class="text-gray-600"><strong>Date Submitted:</strong> 20 July, 2025</p>
+  </div>
+  <p class="text-gray-700 mb-4">An analysis on the cultural factors influencing requirements engineering practices in Bangladesh, highlighting the unique challenges faced by local practitioners.</p>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Cultural Influences</span>
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Requirements Engineering</span>
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Bangladesh Software Industry</span>
+  </div>
+  <div class="flex justify-between items-center">
+    <div>
+      <span class="text-gray-600 text-sm"><i class="fas fa-eye mr-1"></i> 203 views</span>
+      <span class="text-gray-600 text-sm ml-4"><i class="fas fa-download mr-1"></i> 87 downloads</span>
+      <span class="text-gray-600 text-sm ml-4"><i class="fas fa-quote-right mr-1"></i> 5 citations</span>
+    </div>
+    <button class="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" data-paper-id="4">View Paper</button>
+  </div>
+</div>
+
+<!-- Paper 5 - Bangladeshi Version -->
+<div class="paper-card bg-white p-6 rounded-lg shadow-sm" data-status="published" data-category="computer-science" data-title="AI in Bangladeshi Healthcare" data-date="2023-04-05" data-citations="27">
+  <div class="flex justify-between items-start mb-4">
+    <h3 class="text-xl font-semibold text-blue-800">Implementing AI in Bangladeshi Healthcare: Challenges & Opportunities</h3>
+    <span class="status-badge status-published">Published</span>
+  </div>
+  <div class="mb-4">
+    <p class="text-gray-600 mb-2"><strong>Authors:</strong> Dr. Sabrina Ahmed (DU), Dr. Rashed Khan (MIST)</p>
+    <p class="text-gray-600 mb-2"><strong>Institution:</strong> Dhaka University Computer Science Department</p>
+    <p class="text-gray-600"><strong>Date Submitted:</strong> April 5, 2023</p>
+  </div>
+  <p class="text-gray-700 mb-4">Case studies from Bangabandhu Sheikh Mujib Medical University on implementing AI diagnostic tools in resource-constrained settings, addressing data scarcity and cultural acceptance.</p>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">AI Implementation</span>
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Global South</span>
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Medical Ethics</span>
+  </div>
+  <div class="flex justify-between items-center">
+    <div>
+      <span class="text-gray-600 text-sm"><i class="fas fa-eye mr-1"></i> 2,450 views</span>
+      <span class="text-gray-600 text-sm ml-4"><i class="fas fa-download mr-1"></i> 512 downloads</span>
+      <span class="text-gray-600 text-sm ml-4"><i class="fas fa-quote-right mr-1"></i> 27 citations</span>
+    </div>
+    <button class="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" data-paper-id="5">View Paper</button>
+  </div>
+</div>
+
+<!-- Paper 6 - Bangladeshi Version -->
+<div class="paper-card bg-white p-6 rounded-lg shadow-sm" data-status="unpublished" data-category="human computer interaction" data-title="Sundarbans Biodiversity Study" data-date="2023-06-28" data-citations="0">
+  <div class="flex justify-between items-start mb-4">
+    <h3 class="text-xl font-semibold text-blue-800">Motamot: A Dataset for Revealing the Supremacy
+of Large Language Models over Transformer
+Models in Bengali Political Sentiment Analysis</h3>
+    <span class="status-badge status-unpublished">unpublished</span>
+  </div>
+  <div class="mb-4">
+    <p class="text-gray-600 mb-2"><strong>Authors:</strong>Fatema Tuj Johora Faria*
+, Mukaffi Bin Moin*
+, Rabeya Islam Mumu, Md Mahabubul Alam Abir,
+Abrar Nawar Alfy, Mohammad Shafiul Alam</p>
+    <p class="text-gray-600 mb-2"><strong>Institution:</strong>Ahsanullah University of Science and Technology (AUST), Dhaka, Bangladesh</p>
+    <p class="text-gray-600"><strong>Date Submitted:</strong> 28 July, 2024</p>
+  </div>
+  <p class="text-gray-700 mb-4">The paper presents a comprehensive dataset, "Motamot," aimed at enhancing the performance of large language models in analyzing political sentiment in Bengali text. It includes a diverse range of annotated examples, addressing the unique linguistic and cultural aspects of the Bengali language.</p>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Political Sentiment Analysis</span>
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Large Language Models (LLMs)</span>
+    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Bengali Language Dataset
+
+</span>
+  </div>
+  <div class="flex justify-between items-center">
+    <div>
+      <span class="text-gray-600 text-sm"><i class="fas fa-eye mr-1"></i> 897 views</span>
+      <span class="text-gray-600 text-sm ml-4"><i class="fas fa-download mr-1"></i> 0 downloads</span>
+      <span class="text-gray-600 text-sm ml-4"><i class="fas fa-quote-right mr-1"></i> 0 citations</span>
+    </div>
+    <button class="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" data-paper-id="6">View Paper</button>
+  </div>
+</div>
+      
+ <!-- Pagination (Centered and Fixed Size Buttons) -->
+    <div class="flex justify-center mt-10">
+      <nav class="inline-flex space-x-1">
+        <a href="#" class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+        <a href="#" class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded bg-blue-500 text-white">1</a>
+        <a href="#" class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">2</a>
+        <a href="#" class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">3</a>
+        <span class="w-10 h-10 flex items-center justify-center text-gray-500">...</span>
+        <a href="#" class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">8</a>
+        <a href="#" class="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </nav>
+    </div>
+  </div>
+</section>
+
+  <!-- Paper View Modal -->
+  <div id="paper-modal" class="modal">
+    <div class="modal-content p-0">
+      <div class="bg-blue-600 text-white p-6 flex justify-between items-center">
+        <h3 class="text-xl font-bold" id="modal-title">Paper Title</h3>
+        <button id="close-modal" class="text-white hover:text-blue-200">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="mb-6">
+          <p class="text-gray-600 mb-2" id="modal-authors"><strong>Authors:</strong> Author names</p>
+          <p class="text-gray-600 mb-2" id="modal-institution"><strong>Institution:</strong> Institution name</p>
+          <p class="text-gray-600 mb-2" id="modal-date"><strong>Date Submitted:</strong> Submission date</p>
+          <p class="text-gray-600" id="modal-status"><strong>Status:</strong> Paper status</p>
+        </div>
+        
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold mb-2">Abstract</h4>
+          <p class="text-gray-700" id="modal-abstract">Paper abstract will appear here.</p>
+        </div>
+        
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold mb-2">Keywords</h4>
+          <div class="flex flex-wrap gap-2" id="modal-keywords">
+            <!-- Keywords will be inserted here -->
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-200 pt-6 mb-6">
+          <h4 class="text-lg font-semibold mb-4">Paper Preview</h4>
+          <div class="bg-gray-100 p-6 rounded-lg mb-4 h-96">
+            <div id="pdf-preview-container" class="h-full w-full">
+              <iframe id="pdf-viewer" class="w-full h-full border-0" src="" style="display: none;"></iframe>
+              <div id="pdf-loading" class="h-full flex items-center justify-center">
+                <div class="text-center">
+                  <i class="far fa-file-pdf text-red-500 text-5xl mb-4"></i>
+                  <p class="text-gray-700">Loading PDF preview...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div>
+            <span class="text-gray-600 text-sm"><i class="fas fa-eye mr-1"></i> <span id="modal-views">0</span> views</span>
+            <span class="text-gray-600 text-sm ml-4"><i class="fas fa-download mr-1"></i> <span id="modal-downloads">0</span> downloads</span>
+            <span class="text-gray-600 text-sm ml-4"><i class="fas fa-quote-right mr-1"></i> <span id="modal-citations">0</span> citations</span>
+          </div>
+          <div class="flex gap-3">
+            
+            <button id="download-pdf-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition flex items-center">
+              <i class="fas fa-download mr-2"></i> Download PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- index.html or any page -->
+<div id="footer-placeholder"></div>
+<script>
+  fetch("footer.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer-placeholder").innerHTML = data;
+    });
+</script>
+
+
+  <script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Paper data (in a real application, this would come from a database)
+      const paperData = {
+        1: {
+          title: "Advances in Gene Therapy for Rare Diseases",
+          authors: "Dr. Sarah Johnson, Dr. Michael Chen, Dr. Robert Kim",
+          institution: "Harvard Medical School",
+          date: "June 15, 2023",
+          status: "Published",
+          abstract: "This study explores novel gene therapy approaches for treating rare genetic disorders. We investigate various delivery mechanisms including viral vectors and nanoparticles, and present clinical outcomes from three phase II trials. Our findings suggest that targeted gene therapy can significantly improve quality of life for patients with previously untreatable conditions, with minimal side effects compared to traditional treatments.",
+          keywords: ["Gene Therapy", "Rare Diseases", "Clinical Trials"],
+          views: 1245,
+          downloads: 328,
+          citations: 42,
+          pdfUrl: "http://localhost:5000/uploads/Myinfo-HSTU.pdf", // Updated to use server URL
+          ieeeLink: "https://ieeexplore.ieee.org/document/8660780" // IEEE link for published paper
+        },
+        2: {
+          title: "Advancing Exchange Rate Forecasting: Leveraging Machine Learning and AI for Enhanced Accuracy in Global Financial Markets",
+          authors: "Md. Yeasin Rahat, Rajan Das Gupta, Nur Raisa Rahman, Sudipto Roy Pritom, Samiur Rahman Shakir, Md Imrul Hasan Showmick, Md. Jakir Hossen",
+          institution: "American International University-Bangladesh, Dhaka, Bangladesh",
+          date: "11 June, 2025",
+          status: "Unpublished",
+          abstract: "The prediction of foreign exchange rates, such as the US Dollar (USD) to Bangladeshi Taka (BDT), plays a pivotal role in global financial markets, influencing trade, investments, and economic stability. This study leverages historical USD/BDT exchange rate data from 2018 to 2023, sourced from Yahoo Finance, to develop advanced machine learning models for accurate forecasting. A Long Short-Term Memory (LSTM) neural network is employed, achieving an exceptional accuracy of 99.449%, a Root Mean Square Error (RMSE) of 0.9858, and a test loss of 0.8523, significantly outperforming traditional methods like ARIMA (RMSE 1.342). Additionally, a Gradient Boosting Classifier (GBC) is applied for directional prediction, with backtesting on a 20,653.25 over 49 trades. The study analyzes historical trends, showing a decline in BDT/USD rates from 0.012 to 0.009, and incorporates normalized daily returns to capture volatility. These findings highlight the potential of deep learning in forex forecasting, offering traders and policymakers robust tools to mitigate risks. Future work could integrate sentiment analysis and real-time economic indicators to further enhance model adaptability in volatile markets.",
+          keywords: ["Exchange Rate Forecasting", "Machine Learning", "AI"],
+          views: 876,
+          downloads: 0,
+          citations: 0,
+          pdfUrl: "http://localhost:5000/uploads/unpublished/paper2.pdf" // Updated to unpublished paper2.pdf
+        },
+        3: {
+          title: "The Impact of Social Media on Mental Health",
+          authors: "Dr. Amanda Smith, Prof. David Johnson",
+          institution: "Stanford University",
+          date: "May 22, 2023",
+          status: "Published",
+          abstract: "This comprehensive analysis examines the relationship between social media usage patterns and psychological well-being among adolescents and young adults. Through a longitudinal study of 2,500 participants over three years, we identify specific usage patterns associated with increased anxiety, depression, and decreased self-esteem. We also highlight protective factors and propose evidence-based guidelines for healthy social media use.",
+          keywords: ["Social Media", "Mental Health", "Psychology"],
+          views: 2103,
+          downloads: 567,
+          citations: 31,
+          pdfUrl: "/sample-pdfs/paper3.pdf", // Added PDF URL
+          ieeeLink: "https://ieeexplore.ieee.org/document/example2" // IEEE link for published paper
+        },
+        4: {
+          title: "Cultural Impact on Requirements Engineering Activities: Bangladeshi Practitioners' View",
+          authors: "Chowdhury Shahriar Muzammel, Maria Spichkova, James Harland",
+          institution: "RMIT University, Australia",
+          date: " 20 July, 2025",
+          status: "Unpublished",
+          abstract: "Requirements Engineering (RE) is one of the most interaction-intensive phases of software development. This means that RE activities might be especially impacted by stakeholders' national culture. Software development projects increasingly have a very diverse range of stakeholders. To future-proof RE activities, we need to help RE practitioners avoid misunderstandings and conflicts that might arise from not understanding potential Cultural Influences (CIs). Moreover, an awareness of CIs supports diversity and inclusion in the IT profession. Bangladesh has a growing IT sector with some unique socio-cultural characteristics, and has been largely overlooked in this research field. In this study, we aim to investigate how the RE process is adopted in the context of Bangladeshi culture and what cultural influences impact overall RE activities.",
+          keywords: ["Cultural Influences", "Requirements Engineering", "Bangladesh Software Industry"],
+          views: 542,
+          downloads: 0,
+          citations: 0,
+          pdfUrl: "http://localhost:5000/uploads/unpublished/paper4.pdf" // Updated to unpublished paper4.pdf
+        },
+        5: {
+          title: "Artificial Intelligence in Healthcare: Ethical Considerations",
+          authors: "Dr. Richard Lee, Dr. Maria Garcia",
+          institution: "Johns Hopkins University",
+          date: "April 5, 2023",
+          status: "Published",
+          abstract: "This paper addresses the ethical challenges that arise when implementing artificial intelligence solutions in healthcare settings. We examine issues of patient privacy, data security, algorithmic bias, and the changing role of healthcare providers. Through stakeholder interviews and policy analysis, we develop an ethical framework for responsible AI adoption that balances innovation with patient protection and provider autonomy.",
+          keywords: ["Artificial Intelligence", "Healthcare", "Ethics"],
+          views: 1876,
+          downloads: 423,
+          citations: 27,
+          pdfUrl: "/sample-pdfs/paper5.pdf", // Added PDF URL
+          ieeeLink: "https://ieeexplore.ieee.org/document/example3" // IEEE link for published paper
+        },
+        6: {
+          title: "Motamot: A Dataset for Revealing the Supremacy of Large Language Models over Transformer Models in Bengali Political Sentiment Analysis",
+          authors: "Fatema Tuj Johora Faria, Mukaffi Bin Moin, Rabeya Islam Mumu, Md Mahabubul Alam Abir, Abrar Nawar Alfy, Mohammad Shafiul Alam",
+          institution: "Ahsanullah University of Science and Technology (AUST)",
+          date: "28 July, 2024",
+          status: "Unpublished",
+          abstract: "Sentiment analysis is the process of identifying and categorizing people's emotions or opinions regarding various topics. Analyzing political sentiment is critical for understanding the complexities of public opinion processes, especially during election seasons. It gives significant information on voter preferences, attitudes, and current trends. In this study, we investigate political sentiment analysis during Bangladeshi elections, specifically examining how effectively Pre-trained Language Models (PLMs) and Large Language Models (LLMs) capture complex sentiment characteristics. Our study centers on the creation of the Motamot dataset, comprising 7,058 instances annotated with positive and negative sentiments, sourced from diverse online newspaper portals, forming a comprehensive resource for political sentiment analysis. We meticulously evaluate the performance of various PLMs including BanglaBERT, Bangla BERT Base, XLM-RoBERTa, mBERT, and sahajBERT, alongside LLMs such as Gemini 1.5 Pro and GPT 3.5 Turbo. Moreover, we explore zero-shot and few-shot learning strategies to enhance our understanding of political sentiment analysis methodologies. Our findings underscore BanglaBERT's commendable accuracy of 88.10% among PLMs. However, the exploration into LLMs reveals even more promising results. Through the adept application of Few-Shot learning techniques, Gemini 1.5 Pro achieves an impressive accuracy of 96.33%, surpassing the remarkable performance of GPT 3.5 Turbo, which stands at 94%. This underscores Gemini 1.5 Pro's status as the superior performer in this comparison.",
+          keywords: ["Political Sentiment Analysis", "Large Language Models (LLMs)", "Bengali Language Dataset"],
+          views: 324,
+          downloads: 0,
+          citations: 0,
+          pdfUrl: "http://localhost:5000/uploads/unpublished/paper6.pdf" // Updated to unpublished paper6.pdf
+        }
+      };
+      
+      // Filter buttons functionality
+      const filterButtons = document.querySelectorAll('.filter-button');
+      let currentFilter = 'all';
+      let currentCategory = 'all';
+      let currentSort = 'newest';
+      
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove active class from all buttons
+          filterButtons.forEach(btn => {
+            btn.classList.remove('active');
+          });
+          
+          // Add active class to clicked button
+          button.classList.add('active');
+          
+          // Update current filter
+          currentFilter = button.getAttribute('data-filter');
+          
+          // Apply filters
+          applyFilters();
+        });
+      });
+      
+      // Category tabs functionality
+      const categoryTabs = document.querySelectorAll('.category-tab');
+      
+      categoryTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Remove active class from all tabs
+          categoryTabs.forEach(t => {
+            t.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+            t.classList.add('text-gray-500', 'hover:text-gray-700');
+          });
+          
+          // Add active class to clicked tab
+          tab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+          tab.classList.remove('text-gray-500', 'hover:text-gray-700');
+          
+          // Update current category
+          currentCategory = tab.getAttribute('data-category');
+          
+          // Apply filters
+          applyFilters();
+        });
+      });
+      
+      // Sort functionality
+      const sortSelect = document.getElementById('sort-by');
+      sortSelect.addEventListener('change', () => {
+        currentSort = sortSelect.value;
+        applyFilters();
+      });
+      
+      // Search functionality
+      const searchInput = document.getElementById('search-input');
+      searchInput.addEventListener('keyup', () => {
+        applyFilters();
+      });
+      
+      // Apply all filters, sorting, and search
+      function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const papers = document.querySelectorAll('.paper-card');
+        
+        // First hide all papers
+        papers.forEach(paper => {
+          paper.style.display = 'none';
+        });
+        
+        // Filter and sort papers
+        let visiblePapers = Array.from(papers).filter(paper => {
+          // Filter by status
+          if (currentFilter !== 'all' && paper.getAttribute('data-status') !== currentFilter) {
+            return false;
+          }
+          
+          // Filter by category
+          if (currentCategory !== 'all' && paper.getAttribute('data-category') !== currentCategory) {
+            return false;
+          }
+          
+          // Filter by search term
+          if (searchTerm) {
+            const title = paper.getAttribute('data-title').toLowerCase();
+            const content = paper.textContent.toLowerCase();
+            if (!title.includes(searchTerm) && !content.includes(searchTerm)) {
+              return false;
+            }
+          }
+          
+          return true;
+        });
+        
+        // Sort papers
+        visiblePapers.sort((a, b) => {
+          switch (currentSort) {
+            case 'newest':
+              return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+            case 'oldest':
+              return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+            case 'az':
+              return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
+            case 'za':
+              return b.getAttribute('data-title').localeCompare(a.getAttribute('data-title'));
+            case 'citations':
+              return parseInt(b.getAttribute('data-citations')) - parseInt(a.getAttribute('data-citations'));
+            default:
+              return 0;
+          }
+        });
+        
+        // Show filtered and sorted papers
+        visiblePapers.forEach(paper => {
+          paper.style.display = 'block';
+        });
+      }
+      
+      // Modal functionality
+      const modal = document.getElementById('paper-modal');
+      const closeModalBtn = document.getElementById('close-modal');
+      const viewPaperBtns = document.querySelectorAll('.view-paper-btn');
+      
+      // Open modal with paper details
+      viewPaperBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const paperId = btn.getAttribute('data-paper-id');
+          const paper = paperData[paperId];
+          
+          // Populate modal with paper data
+          document.getElementById('modal-title').textContent = paper.title;
+          document.getElementById('modal-authors').innerHTML = `<strong>Authors:</strong> ${paper.authors}`;
+          document.getElementById('modal-institution').innerHTML = `<strong>Institution:</strong> ${paper.institution}`;
+          document.getElementById('modal-date').innerHTML = `<strong>Date Submitted:</strong> ${paper.date}`;
+          document.getElementById('modal-status').innerHTML = `<strong>Status:</strong> ${paper.status}`;
+          document.getElementById('modal-abstract').textContent = paper.abstract;
+          document.getElementById('modal-views').textContent = paper.views;
+          document.getElementById('modal-downloads').textContent = paper.downloads;
+          document.getElementById('modal-citations').textContent = paper.citations;
+          
+          // Clear and populate keywords
+          const keywordsContainer = document.getElementById('modal-keywords');
+          keywordsContainer.innerHTML = '';
+          paper.keywords.forEach(keyword => {
+            const keywordSpan = document.createElement('span');
+            keywordSpan.className = 'bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full';
+            keywordSpan.textContent = keyword;
+            keywordsContainer.appendChild(keywordSpan);
+          });
+          
+          // Show loading state for PDF
+          document.getElementById('pdf-viewer').style.display = 'none';
+          document.getElementById('pdf-loading').style.display = 'flex';
+          
+          // Load PDF or show appropriate message
+          setTimeout(() => {
+            const pdfViewer = document.getElementById('pdf-viewer');
+            const pdfLoading = document.getElementById('pdf-loading');
+            
+            if (paper.status === "Published") {
+              // For published papers, show a message instead of PDF
+              pdfLoading.innerHTML = `
+                <div class="text-center">
+                  <i class="fas fa-lock text-gray-500 text-5xl mb-4"></i>
+                  <p class="text-gray-700 font-medium mb-2">This paper is published in IEEE</p>
+                  <p class="text-gray-600 text-sm">Access the full paper through IEEE Xplore</p>
+                  <button onclick="window.open('${paper.ieeeLink}', '_blank')" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+                    <i class="fas fa-external-link-alt mr-2"></i>View on IEEE
+                  </button>
+                </div>
+              `;
+              pdfViewer.style.display = 'none';
+              pdfLoading.style.display = 'flex';
+            } else {
+              // For unpublished papers, load the PDF
+              pdfViewer.src = paper.pdfUrl;
+              pdfViewer.style.display = 'block';
+              pdfLoading.style.display = 'none';
+            }
+          }, 1000);
+          
+          // Set up download button
+          const downloadBtn = document.getElementById('download-pdf-btn');
+          downloadBtn.onclick = () => {
+            if (paper.status === "Published" && paper.ieeeLink) {
+              // For published papers, open IEEE link in new tab
+              window.open(paper.ieeeLink, '_blank');
+            } else {
+              // For unpublished papers, download the PDF directly
+              const link = document.createElement('a');
+              link.href = paper.pdfUrl;
+              link.download = paper.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          };
+          
+          // Update button text based on paper status
+          if (paper.status === "Published") {
+            downloadBtn.innerHTML = '<i class="fas fa-external-link-alt mr-2"></i> View on IEEE';
+          } else {
+            downloadBtn.innerHTML = '<i class="fas fa-download mr-2"></i> Download PDF';
+          }
+          
+          // Show modal
+          modal.classList.add('active');
+        });
+      });
+      
+      // Close modal
+      closeModalBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+      });
+      
+      // Close modal when clicking outside
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+      
+      // Pagination functionality
+      const paginationButtons = document.querySelectorAll('.pagination-button');
+      
+      paginationButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Remove active class from all pagination buttons
+          paginationButtons.forEach(btn => {
+            btn.classList.remove('active');
+          });
+          
+          // Add active class to clicked button
+          button.classList.add('active');
+          
+          // In a real application, this would load the corresponding page of results
+          // For this demo, we'll just scroll to the top of the papers section
+          document.getElementById('papers-container').scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+    });
+  </script>
+</body>
+</html>
