@@ -6,7 +6,7 @@ const Submit = () => {
     studentId: '',
     email: '',
     department: '',
-    universityName: '',
+    universityName: 'Hajee Mohammad Danesh Science and Technology University',
     paperTitle: '',
     abstract: '',
     keywords: ''
@@ -19,16 +19,19 @@ const Submit = () => {
   const [submissionId, setSubmissionId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [status, setStatus] = useState('unpublished')
+  const [publishedLink, setPublishedLink] = useState('')
+
   
   const fileInputRef = useRef(null)
 
   const departments = [
-    { value: 'computer-science', label: 'Computer Science' },
+    { value: 'computer-science-engineering', label: 'Computer Science and Engineering' },
     { value: 'engineering', label: 'Engineering' },
     { value: 'business', label: 'Business' },
-    { value: 'arts', label: 'Arts & Humanities' },
-    { value: 'science', label: 'Natural Sciences' },
-    { value: 'medicine', label: 'Medicine' }
+    { value: 'agriculture', label: 'Agriculture' },
+    { value: 'fisheries', label: 'Fisheries' },
+    { value: 'ece', label: 'ECE' }
   ]
 
   const handleInputChange = (e) => {
@@ -143,42 +146,88 @@ const Submit = () => {
     setIsSubmitting(true)
 
     try {
+      // Try to submit to server first
       const formDataToSend = new FormData()
       Object.keys(formData).forEach(key => {
         formDataToSend.append(key, formData[key])
       })
-      formDataToSend.append('paper', file)
+      formDataToSend.append('file', file)
 
       const response = await fetch('http://localhost:8000/api/submit', {
         method: 'POST',
         body: formDataToSend
       })
 
-      if (!response.ok) {
-        throw new Error('Submission failed')
+      if (response.ok) {
+        // Server submission successful
+        const data = await response.json()
+        setSubmissionId(data.paper._id || ('SUB-' + Math.floor(10000 + Math.random() * 90000)))
+        setShowSuccessModal(true)
+        
+        // Reset form
+        setFormData({
+          studentName: '',
+          studentId: '',
+          email: '',
+          department: '',
+          universityName: '',
+          paperTitle: '',
+          abstract: '',
+          keywords: ''
+        })
+        setFile(null)
+        setFileInfo(null)
+        setUploadProgress(0)
+        setWordCount(0)
+      } else {
+        throw new Error('Server submission failed')
       }
-
-      const data = await response.json()
-      setSubmissionId(data.submissionId || ('SUB-' + Math.floor(10000 + Math.random() * 90000)))
-      setShowSuccessModal(true)
-      
-      // Reset form
-      setFormData({
-        studentName: '',
-        studentId: '',
-        email: '',
-        department: '',
-        universityName: '',
-        paperTitle: '',
-        abstract: '',
-        keywords: ''
-      })
-      setFile(null)
-      setFileInfo(null)
-      setUploadProgress(0)
-      setWordCount(0)
     } catch (error) {
-      alert('Submission failed. Please try again.')
+      console.error('Server submission error:', error)
+      
+      // Fallback to localStorage if server is not available
+      try {
+        // Generate submission ID
+        const submissionId = 'SUB-' + Math.floor(10000 + Math.random() * 90000)
+        
+        // Create submission object
+        const submission = {
+          id: submissionId,
+          ...formData,
+          fileName: file.name,
+          fileSize: file.size,
+          submittedDate: new Date().toISOString(),
+          status: 'Pending',
+          pdfUrl: URL.createObjectURL(file) // Create a blob URL for the file
+        }
+
+        // Store submission in localStorage for admin review
+        const existingSubmissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]')
+        existingSubmissions.push(submission)
+        localStorage.setItem('paperSubmissions', JSON.stringify(existingSubmissions))
+
+        setSubmissionId(submissionId)
+        setShowSuccessModal(true)
+        
+        // Reset form
+        setFormData({
+          studentName: '',
+          studentId: '',
+          email: '',
+          department: '',
+          universityName: '',
+          paperTitle: '',
+          abstract: '',
+          keywords: ''
+        })
+        setFile(null)
+        setFileInfo(null)
+        setUploadProgress(0)
+        setWordCount(0)
+      } catch (localError) {
+        console.error('Local submission error:', localError)
+        alert('Submission failed. Please try again.')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -193,12 +242,12 @@ const Submit = () => {
       <div className="max-w-4xl mx-auto">
         {/* Welcome Section */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Submit Your Research Paper</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Submit Required Information</h2>
           <p className="text-gray-600 mb-2">
             We're excited to see your research contributions! Use the form below to submit your paper. 
             Make sure your file meets the submission guidelines, and don't forget to double-check your abstract and keywords.
           </p>
-          <p className="text-gray-600">Please fill in the details below and upload your research paper in PDF format.</p>
+          <p className="text-gray-600">Please fill in the details below and upload yours HSTU Myinfo profile as a PDF format.</p>
         </section>
 
         {/* Submission Form */}
@@ -208,7 +257,7 @@ const Submit = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="student-name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
+                  Author's Name
                 </label>
                 <input
                   type="text"
@@ -301,6 +350,57 @@ const Submit = () => {
                 required
               />
             </div>
+
+            {/* Publication Status */}
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Status
+  </label>
+  <div className="flex items-center gap-4">
+    <label className="flex items-center space-x-2">
+      <input
+        type="radio"
+        name="status"
+        value="published"
+        checked={status === 'published'}
+        onChange={(e) => setStatus(e.target.value)}
+        className="form-radio text-blue-600"
+      />
+      <span>Published</span>
+    </label>
+    <label className="flex items-center space-x-2">
+      <input
+        type="radio"
+        name="status"
+        value="unpublished"
+        checked={status === 'unpublished'}
+        onChange={(e) => setStatus(e.target.value)}
+        className="form-radio text-blue-600"
+      />
+      <span>Unpublished</span>
+    </label>
+  </div>
+</div>
+
+{/* Link input if published */}
+{status === 'published' && (
+  <div className="mt-4">
+    <label htmlFor="published-link" className="block text-sm font-medium text-gray-700 mb-1">
+      Publication Link
+    </label>
+    <input
+      type="url"
+      id="published-link"
+      name="publishedLink"
+      value={publishedLink}
+      onChange={(e) => setPublishedLink(e.target.value)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      placeholder="https://yourpaperlink.com"
+      required
+    />
+  </div>
+)}
+
 
             <div>
               <label htmlFor="abstract" className="block text-sm font-medium text-gray-700 mb-1">

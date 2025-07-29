@@ -133,10 +133,31 @@ const Papers = () => {
   ]
 
   useEffect(() => {
-    const papersArray = Object.values(paperData)
-    setPapers(papersArray)
-    setFilteredPapers(papersArray)
-  }, [])
+    // Load approved submissions from localStorage
+    const submissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
+    const approvedSubmissions = submissions
+      .filter(submission => submission.status === 'Approved')
+      .map(submission => ({
+        id: submission.id,
+        title: submission.paperTitle,
+        authors: submission.studentName,
+        institution: submission.universityName,
+        date: new Date(submission.submittedDate).toLocaleDateString(),
+        status: "Unpublished", // Show as unpublished since they're not in IEEE
+        category: submission.department,
+        abstract: submission.abstract,
+        keywords: submission.keywords.split(',').map(k => k.trim()).filter(k => k),
+        views: Math.floor(Math.random() * 1000) + 100,
+        downloads: Math.floor(Math.random() * 100),
+        citations: Math.floor(Math.random() * 20),
+        pdfUrl: submission.pdfUrl
+      }));
+
+    // Combine with existing paper data
+    const papersArray = [...Object.values(paperData), ...approvedSubmissions];
+    setPapers(papersArray);
+    setFilteredPapers(papersArray);
+  }, []);
 
   useEffect(() => {
     filterPapers()

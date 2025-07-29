@@ -12,6 +12,7 @@ import Tools from './pages/Tools'
 import Ethics from './pages/Ethics'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import AdminApproval from './pages/AdminApproval'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/ethics" element={<Ethics />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/admin" element={<AdminApproval />} />
         </Routes>
       </main>
       <Footer />
