@@ -41,7 +41,7 @@ const Papers = () => {
       views: 876,
       downloads: 0,
       citations: 0,
-      pdfUrl: "http://localhost:5000/uploads/unpublished/paper2.pdf"
+      pdfUrl: "/pdf/advancingExchange.pdf"
     },
     3: {
       id: 3,
@@ -72,7 +72,7 @@ const Papers = () => {
       views: 203,
       downloads: 87,
       citations: 5,
-      pdfUrl: "http://localhost:5000/uploads/unpublished/paper4.pdf"
+      pdfUrl: "/pdf/cultural.pdf"
     },
     5: {
       id: 5,
@@ -103,7 +103,7 @@ const Papers = () => {
       views: 897,
       downloads: 0,
       citations: 0,
-      pdfUrl: "http://localhost:5000/uploads/unpublished/paper6.pdf"
+      pdfUrl: "/pdf/motamot.pdf"
     }
   }
 
@@ -220,9 +220,11 @@ const Papers = () => {
     if (selectedPaper.status === "Published" && selectedPaper.ieeeLink) {
       window.open(selectedPaper.ieeeLink, '_blank')
     } else {
+      // For unpublished papers, download the PDF directly
       const link = document.createElement('a')
       link.href = selectedPaper.pdfUrl
       link.download = selectedPaper.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf'
+      link.target = '_blank'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -452,12 +454,16 @@ const Papers = () => {
                         </div>
                       </div>
                     ) : (
-                      <iframe
-                        id="pdf-viewer"
-                        src={selectedPaper.pdfUrl}
-                        className="w-full h-full border-0"
-                        title="PDF Preview"
-                      />
+                      <div className="h-full w-full">
+                        <iframe
+                          id="pdf-viewer"
+                          src={selectedPaper.pdfUrl}
+                          className="w-full h-full border-0"
+                          title="PDF Preview"
+                          onLoad={() => console.log('PDF loaded successfully')}
+                          onError={() => console.log('PDF failed to load')}
+                        />
+                      </div>
                     )}
                   </div>
                 </div>
