@@ -49,14 +49,55 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
           <strong>Author:</strong> {paper.author}
         </p>
         <p className="text-gray-600">
+          <strong>Student ID:</strong> {paper.studentId}
+        </p>
+        <p className="text-gray-600">
+          <strong>Email:</strong> {paper.email}
+        </p>
+        <p className="text-gray-600">
+          <strong>Contact:</strong> {paper.contactNumber}
+        </p>
+        <p className="text-gray-600">
+          <strong>Batch:</strong> {paper.batch}
+        </p>
+        <p className="text-gray-600">
+          <strong>Level:</strong> {paper.level}
+        </p>
+        <p className="text-gray-600">
+          <strong>Semester:</strong> {paper.semester}
+        </p>
+        <p className="text-gray-600">
           <strong>Institution:</strong> {paper.institution}
+        </p>
+        <p className="text-gray-600">
+          <strong>Department:</strong> {paper.category}
         </p>
         <p className="text-gray-600">
           <strong>Submitted:</strong> {paper.submittedDate}
         </p>
         <p className="text-gray-600">
-          <strong>Category:</strong> {paper.category}
+          <strong>Publication Status:</strong> 
+          <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+            paper.publicationStatus === 'published' 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-gray-100 text-gray-800'
+          }`}>
+            {paper.publicationStatus === 'published' ? 'Published' : 'Unpublished'}
+          </span>
         </p>
+        {paper.publicationStatus === 'published' && paper.publishedLink && (
+          <p className="text-gray-600">
+            <strong>Publication Link:</strong> 
+            <a 
+              href={paper.publishedLink} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="ml-2 text-blue-600 hover:text-blue-800 underline"
+            >
+              View Publication
+            </a>
+          </p>
+        )}
       </div>
 
       <div className="mb-4">

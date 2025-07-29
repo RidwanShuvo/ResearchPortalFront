@@ -9,7 +9,11 @@ const Submit = () => {
     universityName: 'Hajee Mohammad Danesh Science and Technology University',
     paperTitle: '',
     abstract: '',
-    keywords: ''
+    keywords: '',
+    contactNumber: '',
+    batch: '',
+    level: '',
+    semester: ''
   })
   const [file, setFile] = useState(null)
   const [fileInfo, setFileInfo] = useState(null)
@@ -32,6 +36,18 @@ const Submit = () => {
     { value: 'agriculture', label: 'Agriculture' },
     { value: 'fisheries', label: 'Fisheries' },
     { value: 'ece', label: 'ECE' }
+  ]
+
+  const levels = [
+    { value: '1', label: 'Level 1' },
+    { value: '2', label: 'Level 2' },
+    { value: '3', label: 'Level 3' },
+    { value: '4', label: 'Level 4' }
+  ]
+
+  const semesters = [
+    { value: '1st', label: '1st Semester' },
+    { value: '2nd', label: '2nd Semester' }
   ]
 
   const handleInputChange = (e) => {
@@ -133,6 +149,11 @@ const Submit = () => {
       return false
     }
 
+    if (status === 'published' && !publishedLink.trim()) {
+      alert('Please provide a publication link for published papers.')
+      return false
+    }
+
     return true
   }
 
@@ -152,6 +173,10 @@ const Submit = () => {
         formDataToSend.append(key, formData[key])
       })
       formDataToSend.append('file', file)
+      formDataToSend.append('status', status)
+      if (status === 'published') {
+        formDataToSend.append('publishedLink', publishedLink)
+      }
 
       const response = await fetch('http://localhost:8000/api/submit', {
         method: 'POST',
@@ -173,8 +198,14 @@ const Submit = () => {
           universityName: '',
           paperTitle: '',
           abstract: '',
-          keywords: ''
+          keywords: '',
+          contactNumber: '',
+          batch: '',
+          level: '',
+          semester: ''
         })
+        setStatus('unpublished')
+        setPublishedLink('')
         setFile(null)
         setFileInfo(null)
         setUploadProgress(0)
@@ -194,10 +225,12 @@ const Submit = () => {
         const submission = {
           id: submissionId,
           ...formData,
+          status: status,
+          publishedLink: status === 'published' ? publishedLink : '',
           fileName: file.name,
           fileSize: file.size,
           submittedDate: new Date().toISOString(),
-          status: 'Pending',
+          submissionStatus: 'Pending',
           pdfUrl: URL.createObjectURL(file) // Create a blob URL for the file
         }
 
@@ -218,8 +251,14 @@ const Submit = () => {
           universityName: '',
           paperTitle: '',
           abstract: '',
-          keywords: ''
+          keywords: '',
+          contactNumber: '',
+          batch: '',
+          level: '',
+          semester: ''
         })
+        setStatus('unpublished')
+        setPublishedLink('')
         setFile(null)
         setFileInfo(null)
         setUploadProgress(0)
@@ -313,6 +352,76 @@ const Submit = () => {
                   {departments.map(dept => (
                     <option key={dept.value} value={dept.value}>
                       {dept.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="contact-number" className="block text-sm font-medium text-gray-700 mb-1">
+                  Contact Number
+                </label>
+                <input
+                  type="tel"
+                  id="contact-number"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="+880 1XXX XXX XXX"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="batch" className="block text-sm font-medium text-gray-700 mb-1">
+                  Batch
+                </label>
+                <input
+                  type="text"
+                  id="batch"
+                  name="batch"
+                  value={formData.batch}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., 2020-21"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-1">
+                  Level
+                </label>
+                <select
+                  id="level"
+                  name="level"
+                  value={formData.level}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="" disabled>Select your level</option>
+                  {levels.map(level => (
+                    <option key={level.value} value={level.value}>
+                      {level.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="semester" className="block text-sm font-medium text-gray-700 mb-1">
+                  Semester
+                </label>
+                <select
+                  id="semester"
+                  name="semester"
+                  value={formData.semester}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="" disabled>Select your semester</option>
+                  {semesters.map(semester => (
+                    <option key={semester.value} value={semester.value}>
+                      {semester.label}
                     </option>
                   ))}
                 </select>

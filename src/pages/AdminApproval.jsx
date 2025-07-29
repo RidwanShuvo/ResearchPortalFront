@@ -119,10 +119,16 @@ const AdminApproval = () => {
             category: paper.department,
             abstract: paper.abstract,
             keywords: paper.keywords ? paper.keywords.split(',').map(k => k.trim()).filter(k => k) : [],
-            status: paper.status || 'Pending',
+            status: paper.submissionStatus || 'Pending',
             pdfUrl: paper.cloudinaryUrl,
             email: paper.email,
-            studentId: paper.studentId
+            studentId: paper.studentId,
+            contactNumber: paper.contactNumber,
+            batch: paper.batch,
+            level: paper.level,
+            semester: paper.semester,
+            publicationStatus: paper.status,
+            publishedLink: paper.publishedLink
           }));
           
           // Get submissions from localStorage as fallback
@@ -136,10 +142,16 @@ const AdminApproval = () => {
             category: submission.department,
             abstract: submission.abstract,
             keywords: submission.keywords.split(',').map(k => k.trim()).filter(k => k),
-            status: submission.status,
+            status: submission.submissionStatus || 'Pending',
             pdfUrl: submission.pdfUrl,
             email: submission.email,
-            studentId: submission.studentId
+            studentId: submission.studentId,
+            contactNumber: submission.contactNumber,
+            batch: submission.batch,
+            level: submission.level,
+            semester: submission.semester,
+            publicationStatus: submission.status,
+            publishedLink: submission.publishedLink
           }));
 
           // Combine server papers, localStorage papers, and mock data
@@ -162,10 +174,16 @@ const AdminApproval = () => {
           category: submission.department,
           abstract: submission.abstract,
           keywords: submission.keywords.split(',').map(k => k.trim()).filter(k => k),
-          status: submission.status,
+          status: submission.submissionStatus || 'Pending',
           pdfUrl: submission.pdfUrl,
           email: submission.email,
-          studentId: submission.studentId
+          studentId: submission.studentId,
+          contactNumber: submission.contactNumber,
+          batch: submission.batch,
+          level: submission.level,
+          semester: submission.semester,
+          publicationStatus: submission.status,
+          publishedLink: submission.publishedLink
         }));
 
         const allPapers = [...mockPapers, ...papersFromSubmissions];
