@@ -49,37 +49,40 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
           <span className={getStatusBadge(paper.status)}>
             {paper.status ? paper.status.charAt(0).toUpperCase() + paper.status.slice(1).toLowerCase() : 'Unknown'}
           </span>
-          {/* Show if this is a mock paper */}
-          {(typeof paper.id === 'number' || (typeof paper.id === 'string' && /^\d+$/.test(paper.id))) && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-              Demo Paper
-            </span>
-          )}
         </div>
       </div>
 
       <div className="mb-4 space-y-2">
-        <p className="text-gray-600">
-          <strong>Author:</strong> {paper.author}
-        </p>
-        <p className="text-gray-600">
-          <strong>Student ID:</strong> {paper.studentId}
-        </p>
-        <p className="text-gray-600">
-          <strong>Email:</strong> {paper.email}
-        </p>
-        <p className="text-gray-600">
-          <strong>Department:</strong> {paper.category}
-        </p>
-        <p className="text-gray-600">
-          <strong>Batch:</strong> {paper.batch}
-        </p>
-        <p className="text-gray-600">
-          <strong>Level:</strong> {paper.level}
-        </p>
-        <p className="text-gray-600">
-          <strong>Semester:</strong> {paper.semester}
-        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-gray-600">
+              <strong>Author:</strong> {paper.author}
+            </p>
+            <p className="text-gray-600">
+              <strong>Student ID:</strong> {paper.studentId}
+            </p>
+            <p className="text-gray-600">
+              <strong>Email:</strong> {paper.email}
+            </p>
+            <p className="text-gray-600">
+              <strong>Contact:</strong> {paper.contactNumber}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-600">
+              <strong>Department:</strong> {paper.category}
+            </p>
+            <p className="text-gray-600">
+              <strong>Batch:</strong> {paper.batch}
+            </p>
+            <p className="text-gray-600">
+              <strong>Level:</strong> {paper.level}
+            </p>
+            <p className="text-gray-600">
+              <strong>Semester:</strong> {paper.semester}
+            </p>
+          </div>
+        </div>
         <p className="text-gray-600">
           <strong>Submitted:</strong> {paper.submittedDate}
         </p>
@@ -111,6 +114,30 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
               {keyword}
             </span>
           ))}
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <h4 className="font-medium text-gray-700 mb-2">Publication Status:</h4>
+        <div className="flex items-center space-x-4">
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+            paper.publicationStatus === 'published' 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-gray-100 text-gray-800'
+          }`}>
+            {paper.publicationStatus === 'published' ? 'Published' : 'Unpublished'}
+          </span>
+          {paper.publishedLink && (
+            <a
+              href={paper.publishedLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
+            >
+              <i className="fas fa-external-link-alt mr-1"></i>
+              View Publication
+            </a>
+          )}
         </div>
       </div>
 
