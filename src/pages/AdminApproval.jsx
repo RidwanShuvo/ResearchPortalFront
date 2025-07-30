@@ -110,25 +110,28 @@ const AdminApproval = () => {
         const response = await fetch('http://localhost:8000/api/papers');
         if (response.ok) {
           const serverPapers = await response.json();
+          console.log('Server papers fetched:', serverPapers); // Debug log
           const formattedServerPapers = serverPapers.map(paper => ({
             id: paper._id,
-            title: paper.paperTitle,
-            author: paper.studentName,
-            institution: paper.universityName,
-            submittedDate: new Date(paper.submittedAt).toLocaleDateString(),
-            category: paper.department,
-            abstract: paper.abstract,
+            title: paper.paperTitle || 'Untitled',
+            author: paper.studentName || 'Unknown Author',
+            institution: paper.universityName || 'Unknown Institution',
+            submittedDate: paper.submittedAt ? new Date(paper.submittedAt).toLocaleDateString() : 'Unknown Date',
+            category: paper.department || 'Unknown Department',
+            abstract: paper.abstract || 'No abstract available',
             keywords: paper.keywords ? paper.keywords.split(',').map(k => k.trim()).filter(k => k) : [],
-            status: paper.submissionStatus || 'Pending',
-            pdfUrl: paper.cloudinaryUrl,
-            email: paper.email,
-            studentId: paper.studentId,
-            contactNumber: paper.contactNumber,
-            batch: paper.batch,
-            level: paper.level,
-            semester: paper.semester,
-            publicationStatus: paper.status,
-            publishedLink: paper.publishedLink
+            status: paper.submissionStatus === 'pending' ? 'Pending' : 
+                   paper.submissionStatus === 'approved' ? 'Approved' : 
+                   paper.submissionStatus === 'rejected' ? 'Rejected' : 'Pending',
+            pdfUrl: paper.cloudinaryUrl || null,
+            email: paper.email || 'No email provided',
+            studentId: paper.studentId || 'No ID provided',
+            contactNumber: paper.contactNumber || 'No contact provided',
+            batch: paper.batch || 'No batch info',
+            level: paper.level || 'No level info',
+            semester: paper.semester || 'No semester info',
+            publicationStatus: paper.status || 'unpublished',
+            publishedLink: paper.publishedLink || null
           }));
           
           // Get submissions from localStorage as fallback
@@ -156,6 +159,7 @@ const AdminApproval = () => {
 
           // Combine server papers, localStorage papers, and mock data
           const allPapers = [...mockPapers, ...formattedServerPapers, ...papersFromSubmissions];
+          console.log('All papers after formatting:', allPapers); // Debug log
           setPapers(allPapers);
         } else {
           throw new Error('Server not available');
@@ -200,9 +204,9 @@ const AdminApproval = () => {
     // Calculate stats
     const newStats = {
       total: papers.length,
-      pending: papers.filter(p => p.status === 'Pending').length,
-      approved: papers.filter(p => p.status === 'Approved').length,
-      rejected: papers.filter(p => p.status === 'Rejected').length
+      pending: papers.filter(p => p.status.toLowerCase() === 'pending').length,
+      approved: papers.filter(p => p.status.toLowerCase() === 'approved').length,
+      rejected: papers.filter(p => p.status.toLowerCase() === 'rejected').length
     };
     setStats(newStats);
 
@@ -210,7 +214,9 @@ const AdminApproval = () => {
     let filtered = papers;
     
     if (selectedStatus !== 'all') {
-      filtered = filtered.filter(paper => paper.status === selectedStatus);
+      filtered = filtered.filter(paper => 
+        paper.status.toLowerCase() === selectedStatus.toLowerCase()
+      );
     }
     
     if (searchTerm) {
@@ -224,23 +230,41 @@ const AdminApproval = () => {
     setFilteredPapers(filtered);
   }, [papers, selectedStatus, searchTerm]);
 
-  const handleStatusUpdate = (paperId, newStatus) => {
-    setPapers(prevPapers => 
-      prevPapers.map(paper => 
-        paper.id === paperId 
-          ? { ...paper, status: newStatus }
-          : paper
-      )
-    );
+  const handleStatusUpdate = async (paperId, newStatus) => {
+    try {
+      // Update on server first
+      const response = await fetch(`http://localhost:8000/api/papers/${paperId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus.toLowerCase() }),
+      });
 
-    // Update localStorage
-    const submissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
-    const updatedSubmissions = submissions.map(submission => 
-      submission.id === paperId 
-        ? { ...submission, status: newStatus }
-        : submission
-    );
-    localStorage.setItem('paperSubmissions', JSON.stringify(updatedSubmissions));
+      if (response.ok) {
+        // Update local state
+        setPapers(prevPapers => 
+          prevPapers.map(paper => 
+            paper.id === paperId 
+              ? { ...paper, status: newStatus }
+              : paper
+          )
+        );
+
+        // Update localStorage as fallback
+        const submissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
+        const updatedSubmissions = submissions.map(submission => 
+          submission.id === paperId 
+            ? { ...submission, submissionStatus: newStatus }
+            : submission
+        );
+        localStorage.setItem('paperSubmissions', JSON.stringify(updatedSubmissions));
+      } else {
+        console.error('Failed to update status on server');
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
   const handleLogout = () => {

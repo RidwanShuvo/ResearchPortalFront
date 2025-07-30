@@ -16,12 +16,13 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";
-    switch (status) {
-      case 'Pending':
+    const statusLower = status.toLowerCase();
+    switch (statusLower) {
+      case 'pending':
         return `${baseClasses} bg-yellow-100 text-yellow-800`;
-      case 'Approved':
+      case 'approved':
         return `${baseClasses} bg-green-100 text-green-800`;
-      case 'Rejected':
+      case 'rejected':
         return `${baseClasses} bg-red-100 text-red-800`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800`;
@@ -40,7 +41,7 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
           {paper.title}
         </h3>
         <span className={getStatusBadge(paper.status)}>
-          {paper.status}
+          {paper.status.charAt(0).toUpperCase() + paper.status.slice(1).toLowerCase()}
         </span>
       </div>
 
@@ -55,7 +56,7 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
           <strong>Email:</strong> {paper.email}
         </p>
         <p className="text-gray-600">
-          <strong>Contact:</strong> {paper.contactNumber}
+          <strong>Department:</strong> {paper.category}
         </p>
         <p className="text-gray-600">
           <strong>Batch:</strong> {paper.batch}
@@ -67,37 +68,8 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
           <strong>Semester:</strong> {paper.semester}
         </p>
         <p className="text-gray-600">
-          <strong>Institution:</strong> {paper.institution}
-        </p>
-        <p className="text-gray-600">
-          <strong>Department:</strong> {paper.category}
-        </p>
-        <p className="text-gray-600">
           <strong>Submitted:</strong> {paper.submittedDate}
         </p>
-        <p className="text-gray-600">
-          <strong>Publication Status:</strong> 
-          <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
-            paper.publicationStatus === 'published' 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-gray-100 text-gray-800'
-          }`}>
-            {paper.publicationStatus === 'published' ? 'Published' : 'Unpublished'}
-          </span>
-        </p>
-        {paper.publicationStatus === 'published' && paper.publishedLink && (
-          <p className="text-gray-600">
-            <strong>Publication Link:</strong> 
-            <a 
-              href={paper.publishedLink} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="ml-2 text-blue-600 hover:text-blue-800 underline"
-            >
-              View Publication
-            </a>
-          </p>
-        )}
       </div>
 
       <div className="mb-4">
@@ -132,27 +104,45 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
       <div className="mb-6">
         <h4 className="font-medium text-gray-700 mb-2">PDF:</h4>
         <div className="flex items-center space-x-4">
-          <a
-            href={paper.pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 flex items-center"
-          >
-            <i className="fas fa-file-pdf mr-2"></i>
-            View PDF
-          </a>
-          <a
-            href={paper.pdfUrl}
-            download
-            className="text-green-600 hover:text-green-800 flex items-center"
-          >
-            <i className="fas fa-download mr-2"></i>
-            Download
-          </a>
+          {paper.pdfUrl && paper.pdfUrl.trim() !== '' ? (
+            <>
+              <a
+                href={paper.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 flex items-center"
+                onClick={(e) => {
+                  if (!paper.pdfUrl.startsWith('http')) {
+                    e.preventDefault();
+                    alert('PDF URL is not accessible. Please check the file upload.');
+                  }
+                }}
+              >
+                <i className="fas fa-file-pdf mr-2"></i>
+                View PDF
+              </a>
+              <a
+                href={paper.pdfUrl}
+                download={`${paper.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`}
+                className="text-green-600 hover:text-green-800 flex items-center"
+                onClick={(e) => {
+                  if (!paper.pdfUrl.startsWith('http')) {
+                    e.preventDefault();
+                    alert('PDF URL is not accessible. Please check the file upload.');
+                  }
+                }}
+              >
+                <i className="fas fa-download mr-2"></i>
+                Download
+              </a>
+            </>
+          ) : (
+            <span className="text-gray-500 text-sm">PDF not available</span>
+          )}
         </div>
       </div>
 
-      {paper.status === 'Pending' && (
+      {(paper.status === 'Pending' || paper.status === 'pending') && (
         <div className="flex space-x-3">
           <button
             onClick={() => handleStatusUpdate('Approved')}
