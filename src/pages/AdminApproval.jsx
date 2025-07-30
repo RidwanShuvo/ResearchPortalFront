@@ -110,7 +110,6 @@ const AdminApproval = () => {
         const response = await fetch('http://localhost:8000/api/papers');
         if (response.ok) {
           const serverPapers = await response.json();
-          console.log('Server papers fetched:', serverPapers); // Debug log
           const formattedServerPapers = serverPapers.map(paper => ({
             id: paper._id,
             title: paper.paperTitle || 'Untitled',
@@ -159,7 +158,6 @@ const AdminApproval = () => {
 
           // Combine server papers, localStorage papers, and mock data
           const allPapers = [...mockPapers, ...formattedServerPapers, ...papersFromSubmissions];
-          console.log('All papers after formatting:', allPapers); // Debug log
           setPapers(allPapers);
         } else {
           throw new Error('Server not available');
@@ -204,9 +202,9 @@ const AdminApproval = () => {
     // Calculate stats
     const newStats = {
       total: papers.length,
-      pending: papers.filter(p => p.status.toLowerCase() === 'pending').length,
-      approved: papers.filter(p => p.status.toLowerCase() === 'approved').length,
-      rejected: papers.filter(p => p.status.toLowerCase() === 'rejected').length
+      pending: papers.filter(p => p.status?.toLowerCase() === 'pending').length,
+      approved: papers.filter(p => p.status?.toLowerCase() === 'approved').length,
+      rejected: papers.filter(p => p.status?.toLowerCase() === 'rejected').length
     };
     setStats(newStats);
 
@@ -215,7 +213,7 @@ const AdminApproval = () => {
     
     if (selectedStatus !== 'all') {
       filtered = filtered.filter(paper => 
-        paper.status.toLowerCase() === selectedStatus.toLowerCase()
+        paper.status?.toLowerCase() === selectedStatus.toLowerCase()
       );
     }
     
@@ -232,7 +230,23 @@ const AdminApproval = () => {
 
   const handleStatusUpdate = async (paperId, newStatus) => {
     try {
-      // Update on server first
+      // Check if this is a mock paper (numeric ID) or real paper (ObjectId)
+      const isMockPaper = typeof paperId === 'number' || (typeof paperId === 'string' && /^\d+$/.test(paperId));
+      
+      if (isMockPaper) {
+        // For mock papers, only update local state
+        setPapers(prevPapers => 
+          prevPapers.map(paper => 
+            paper.id === paperId 
+              ? { ...paper, status: newStatus }
+              : paper
+          )
+        );
+        console.log(`Updated mock paper ${paperId} status to ${newStatus}`);
+        return;
+      }
+
+      // For real papers, update on server first
       const response = await fetch(`http://localhost:8000/api/papers/${paperId}/status`, {
         method: 'PUT',
         headers: {
@@ -259,6 +273,8 @@ const AdminApproval = () => {
             : submission
         );
         localStorage.setItem('paperSubmissions', JSON.stringify(updatedSubmissions));
+        
+        console.log(`Successfully updated paper ${paperId} status to ${newStatus}`);
       } else {
         console.error('Failed to update status on server');
       }

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 const PaperCard = ({ paper, onStatusUpdate }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showFullAbstract, setShowFullAbstract] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const handleStatusUpdate = async (newStatus) => {
     setIsLoading(true);
@@ -12,11 +13,15 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
     
     onStatusUpdate(paper.id, newStatus);
     setIsLoading(false);
+    
+    // Show success message
+    setShowSuccessMessage(true);
+    setTimeout(() => setShowSuccessMessage(false), 3000);
   };
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";
-    const statusLower = status.toLowerCase();
+    const statusLower = status?.toLowerCase() || '';
     switch (statusLower) {
       case 'pending':
         return `${baseClasses} bg-yellow-100 text-yellow-800`;
@@ -40,9 +45,17 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         <h3 className="text-xl font-semibold text-gray-800 flex-1 mr-4">
           {paper.title}
         </h3>
-        <span className={getStatusBadge(paper.status)}>
-          {paper.status.charAt(0).toUpperCase() + paper.status.slice(1).toLowerCase()}
-        </span>
+        <div className="flex flex-col items-end space-y-1">
+          <span className={getStatusBadge(paper.status)}>
+            {paper.status ? paper.status.charAt(0).toUpperCase() + paper.status.slice(1).toLowerCase() : 'Unknown'}
+          </span>
+          {/* Show if this is a mock paper */}
+          {(typeof paper.id === 'number' || (typeof paper.id === 'string' && /^\d+$/.test(paper.id))) && (
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              Demo Paper
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mb-4 space-y-2">
@@ -142,7 +155,8 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         </div>
       </div>
 
-      {(paper.status === 'Pending' || paper.status === 'pending') && (
+      {/* Show Approve/Reject buttons for pending papers */}
+      {paper.status?.toLowerCase() === 'pending' && (
         <div className="flex space-x-3">
           <button
             onClick={() => handleStatusUpdate('Approved')}
@@ -175,7 +189,7 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         </div>
       )}
 
-      {paper.status === 'Approved' && (
+      {paper.status?.toLowerCase() === 'approved' && (
         <div className="bg-green-50 border border-green-200 rounded-md p-3">
           <p className="text-green-700 text-sm flex items-center">
             <i className="fas fa-check-circle mr-2"></i>
@@ -184,11 +198,21 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         </div>
       )}
 
-      {paper.status === 'Rejected' && (
+      {paper.status?.toLowerCase() === 'rejected' && (
         <div className="bg-red-50 border border-red-200 rounded-md p-3">
           <p className="text-red-700 text-sm flex items-center">
             <i className="fas fa-times-circle mr-2"></i>
             This paper has been rejected and is not visible to users.
+          </p>
+        </div>
+      )}
+
+      {/* Success message */}
+      {showSuccessMessage && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50">
+          <p className="flex items-center">
+            <i className="fas fa-check-circle mr-2"></i>
+            Status updated successfully!
           </p>
         </div>
       )}
