@@ -45,6 +45,8 @@ export const AdminProvider = ({ children }) => {
 
   const login = () => {
     setIsAdminLoggedIn(true);
+    localStorage.setItem('adminLoggedIn', 'true');
+    localStorage.setItem('adminLoginTime', new Date().toISOString());
   };
 
   const logout = () => {
@@ -57,7 +59,7 @@ export const AdminProvider = ({ children }) => {
     isAdminLoggedIn,
     isLoading,
     login,
-    logout
+    logout,
   };
 
   return (
@@ -65,4 +67,4 @@ export const AdminProvider = ({ children }) => {
       {children}
     </AdminContext.Provider>
   );
-}; 
+};

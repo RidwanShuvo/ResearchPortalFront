@@ -18,11 +18,12 @@ const AdminApproval = () => {
   const navigate = useNavigate();
   const { isAdminLoggedIn, logout } = useAdmin();
 
-  // ✅ Moved loadPapers outside useEffect
   const loadPapers = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/papers');
+      const response = await fetch('http://localhost:5000/api/papers', {
+        credentials: 'include',
+      });
       if (response.ok) {
         const serverPapers = await response.json();
         console.log(serverPapers);
@@ -35,9 +36,11 @@ const AdminApproval = () => {
           category: paper.department || 'Unknown Department',
           abstract: paper.abstract || 'No abstract available',
           keywords: paper.keywords ? paper.keywords.split(',').map(k => k.trim()).filter(k => k) : [],
-          status: paper.submissionStatus === 'pending' ? 'Pending' : 
-                 paper.submissionStatus === 'approved' ? 'Approved' : 
-                 paper.submissionStatus === 'rejected' ? 'Rejected' : 'Pending',
+          status: paper.submissionStatus === 'pending' ? 'Pending'
+      : paper.submissionStatus === 'approved' ? 'Approved'
+      : paper.submissionStatus === 'rejected' ? 'Rejected'
+      : 'Pending',
+
           pdfUrl: paper.cloudinaryUrl || null,
           email: paper.email || 'No email provided',
           studentId: paper.studentId || 'No ID provided',
@@ -94,8 +97,7 @@ const AdminApproval = () => {
 
     setFilteredPapers(filtered);
   }, [papers, selectedStatus, searchTerm]);
-
-  // ✅ Status update function
+  // Updated Status update function:
   const handleStatusUpdate = async (paperId, newStatus) => {
     try {
       const response = await fetch(`http://localhost:5000/api/papers/${paperId}/status`, {
@@ -107,11 +109,12 @@ const AdminApproval = () => {
       });
 
       if (response.ok) {
-        setPapers(prev =>
-          prev.map(p =>
-            p.id === paperId ? { ...p, status: newStatus } : p
-          )
-        );
+        // Reload full papers list from backend after updating status
+        await loadPapers();
+
+        // Reset filter so updated list shows properly
+        setSelectedStatus('all');
+
         console.log(`✅ Updated ${paperId} to ${newStatus}`);
       } else {
         console.error('❌ Server did not update status');

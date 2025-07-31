@@ -7,16 +7,16 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
 
   const handleStatusUpdate = async (newStatus) => {
     setIsLoading(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    onStatusUpdate(paper.id, newStatus);
-    setIsLoading(false);
-    
-    // Show success message
-    setShowSuccessMessage(true);
-    setTimeout(() => setShowSuccessMessage(false), 3000);
+    try {
+      // Changed here: use paper.id instead of paper._id
+      await onStatusUpdate(paper._id, newStatus);
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+    } catch (error) {
+      alert('Failed to update status. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -55,37 +55,19 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
       <div className="mb-4 space-y-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p className="text-gray-600">
-              <strong>Author:</strong> {paper.author}
-            </p>
-            <p className="text-gray-600">
-              <strong>Student ID:</strong> {paper.studentId}
-            </p>
-            <p className="text-gray-600">
-              <strong>Email:</strong> {paper.email}
-            </p>
-            <p className="text-gray-600">
-              <strong>Contact:</strong> {paper.contactNumber}
-            </p>
+            <p className="text-gray-600"><strong>Author:</strong> {paper.author}</p>
+            <p className="text-gray-600"><strong>Student ID:</strong> {paper.studentId}</p>
+            <p className="text-gray-600"><strong>Email:</strong> {paper.email}</p>
+            <p className="text-gray-600"><strong>Contact:</strong> {paper.contactNumber}</p>
           </div>
           <div>
-            <p className="text-gray-600">
-              <strong>Department:</strong> {paper.category}
-            </p>
-            <p className="text-gray-600">
-              <strong>Batch:</strong> {paper.batch}
-            </p>
-            <p className="text-gray-600">
-              <strong>Level:</strong> {paper.level}
-            </p>
-            <p className="text-gray-600">
-              <strong>Semester:</strong> {paper.semester}
-            </p>
+            <p className="text-gray-600"><strong>Department:</strong> {paper.category}</p>
+            <p className="text-gray-600"><strong>Batch:</strong> {paper.batch}</p>
+            <p className="text-gray-600"><strong>Level:</strong> {paper.level}</p>
+            <p className="text-gray-600"><strong>Semester:</strong> {paper.semester}</p>
           </div>
         </div>
-        <p className="text-gray-600">
-          <strong>Submitted:</strong> {paper.submittedDate}
-        </p>
+        <p className="text-gray-600"><strong>Submitted:</strong> {paper.submittedDate}</p>
       </div>
 
       <div className="mb-4">
@@ -107,10 +89,7 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         <h4 className="font-medium text-gray-700 mb-2">Keywords:</h4>
         <div className="flex flex-wrap gap-2">
           {paper.keywords.map((keyword, index) => (
-            <span
-              key={index}
-              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-            >
+            <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
               {keyword}
             </span>
           ))}
@@ -121,9 +100,7 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         <h4 className="font-medium text-gray-700 mb-2">Publication Status:</h4>
         <div className="flex items-center space-x-4">
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            paper.publicationStatus === 'published' 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-gray-100 text-gray-800'
+            paper.publicationStatus === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
           }`}>
             {paper.publicationStatus === 'published' ? 'Published' : 'Unpublished'}
           </span>
@@ -182,7 +159,6 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         </div>
       </div>
 
-      {/* Show Approve/Reject buttons for pending papers */}
       {paper.status?.toLowerCase() === 'pending' && (
         <div className="flex space-x-3">
           <button
@@ -190,28 +166,14 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
             disabled={isLoading}
             className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {isLoading ? (
-              <i className="fas fa-spinner fa-spin"></i>
-            ) : (
-              <>
-                <i className="fas fa-check mr-2"></i>
-                Approve
-              </>
-            )}
+            {isLoading ? <i className="fas fa-spinner fa-spin"></i> : <><i className="fas fa-check mr-2"></i>Approve</>}
           </button>
           <button
             onClick={() => handleStatusUpdate('Rejected')}
             disabled={isLoading}
             className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {isLoading ? (
-              <i className="fas fa-spinner fa-spin"></i>
-            ) : (
-              <>
-                <i className="fas fa-times mr-2"></i>
-                Reject
-              </>
-            )}
+            {isLoading ? <i className="fas fa-spinner fa-spin"></i> : <><i className="fas fa-times mr-2"></i>Reject</>}
           </button>
         </div>
       )}
@@ -234,7 +196,6 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
         </div>
       )}
 
-      {/* Success message */}
       {showSuccessMessage && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50">
           <p className="flex items-center">
@@ -247,4 +208,4 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
   );
 };
 
-export default PaperCard; 
+export default PaperCard;
