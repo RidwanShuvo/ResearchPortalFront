@@ -169,7 +169,7 @@ const Guidelines = () => {
           <h3 className="text-2xl font-bold text-blue-800 mb-4">Need a Printable Version?</h3>
           <p className="text-lg text-gray-700 mb-6">Download our complete guidelines document for offline reference.</p>
           <a 
-            href="https://drive.google.com/file/d/1BtcbpsLIMW8pXR5VrYiVXREg56PbJIj2/view?usp=sharing" 
+            href="https://drive.google.com/file/d/1lHKgvN521y2IWQoe3tPUrcMHKFZzeAwZ/view?usp=drivesdk" 
             className="bg-blue-600 text-white py-3 px-8 rounded-md hover:bg-blue-700 transition shadow-lg inline-flex items-center"
             target="_blank"
             rel="noopener noreferrer"

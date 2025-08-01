@@ -9,6 +9,10 @@ const Papers = () => {
   const [currentSort, setCurrentSort] = useState('newest')
   const [selectedPaper, setSelectedPaper] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [papersPerPage] = useState(4) // Changed to 4 papers per page
 
   // Paper data matching the original HTML exactly
   const paperData = {
@@ -166,6 +170,7 @@ const Papers = () => {
 
   useEffect(() => {
     filterPapers()
+    setCurrentPage(1) // Reset to first page when filters change
   }, [searchTerm, selectedCategory, currentFilter, currentSort, papers])
 
   const filterPapers = () => {
@@ -266,6 +271,31 @@ const Papers = () => {
     }
   }
 
+  // Pagination calculations
+  const indexOfLastPaper = currentPage * papersPerPage
+  const indexOfFirstPaper = indexOfLastPaper - papersPerPage
+  const currentPapers = filteredPapers.slice(indexOfFirstPaper, indexOfLastPaper)
+  const totalPages = Math.ceil(filteredPapers.length / papersPerPage)
+
+  // Change page
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber)
+  }
+
+  // Go to previous page
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  // Go to next page
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
   return (
     <div>
       {/* Hero Section */}
@@ -361,7 +391,8 @@ const Papers = () => {
           
           {/* Papers Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {filteredPapers.map(paper => (
+            {currentPapers.length > 0 ? (
+              currentPapers.map(paper => (
               <div
                 key={paper.id}
                 className="paper-card bg-white p-6 rounded-lg shadow-sm"
@@ -390,40 +421,92 @@ const Papers = () => {
                     </span>
                   ))}
                 </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-gray-600 text-sm"><i className="fas fa-eye mr-1"></i> {paper.views.toLocaleString()} views</span>
-                    <span className="text-gray-600 text-sm ml-4"><i className="fas fa-download mr-1"></i> {paper.downloads} downloads</span>
-                    <span className="text-gray-600 text-sm ml-4"><i className="fas fa-quote-right mr-1"></i> {paper.citations} citations</span>
-                  </div>
-                  <button
-                    onClick={() => handlePaperClick(paper)}
-                    className="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                    data-paper-id={paper.id}
-                  >
-                    View Paper
-                  </button>
+                                 <div className="flex justify-end">
+                   <button
+                     onClick={() => handlePaperClick(paper)}
+                     className="view-paper-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                     data-paper-id={paper.id}
+                   >
+                     View Paper
+                   </button>
+                 </div>
+              </div>
+            ))
+            ) : (
+              <div className="col-span-2 text-center py-12">
+                <div className="text-gray-500">
+                  <i className="fas fa-search text-4xl mb-4"></i>
+                  <h3 className="text-xl font-semibold mb-2">No papers found</h3>
+                  <p>No papers match your current filters. Try adjusting your search criteria.</p>
                 </div>
               </div>
-            ))}
+            )}
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-center mt-10">
-            <nav className="inline-flex space-x-1">
-              <a href="#" className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">
-                <i className="fas fa-chevron-left"></i>
-              </a>
-              <a href="#" className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded bg-blue-500 text-white">1</a>
-              <a href="#" className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">2</a>
-              <a href="#" className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">3</a>
-              <span className="w-10 h-10 flex items-center justify-center text-gray-500">...</span>
-              <a href="#" className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">8</a>
-              <a href="#" className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-200 text-gray-700">
-                <i className="fas fa-chevron-right"></i>
-              </a>
-            </nav>
-          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-10">
+              <nav className="inline-flex space-x-1">
+                <button 
+                  onClick={goToPreviousPage}
+                  disabled={currentPage === 1}
+                  className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded transition ${
+                    currentPage === 1 
+                      ? 'text-gray-400 cursor-not-allowed' 
+                      : 'hover:bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  <i className="fas fa-chevron-left"></i>
+                </button>
+                
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map(number => {
+                  // Show first page, last page, current page, and pages around current page
+                  if (
+                    number === 1 ||
+                    number === totalPages ||
+                    (number >= currentPage - 1 && number <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={number}
+                        onClick={() => paginate(number)}
+                        className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded transition ${
+                          currentPage === number
+                            ? 'bg-blue-500 text-white'
+                            : 'hover:bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {number}
+                      </button>
+                    )
+                  } else if (
+                    number === currentPage - 2 ||
+                    number === currentPage + 2
+                  ) {
+                    return (
+                      <span key={number} className="w-10 h-10 flex items-center justify-center text-gray-500">
+                        ...
+                      </span>
+                    )
+                  }
+                  return null
+                })}
+                
+                <button 
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`w-10 h-10 flex items-center justify-center border border-gray-300 rounded transition ${
+                    currentPage === totalPages 
+                      ? 'text-gray-400 cursor-not-allowed' 
+                      : 'hover:bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  <i className="fas fa-chevron-right"></i>
+                </button>
+              </nav>
+            </div>
+          )}
         </div>
       </section>
 
@@ -438,11 +521,79 @@ const Papers = () => {
               </button>
             </div>
             <div className="p-6">
+              {/* Author Information */}
               <div className="mb-6">
-                <p className="text-gray-600 mb-2" id="modal-authors"><strong>Authors:</strong> {selectedPaper.authors}</p>
-                <p className="text-gray-600 mb-2" id="modal-institution"><strong>Institution:</strong> {selectedPaper.institution}</p>
-                <p className="text-gray-600 mb-2" id="modal-date"><strong>Date Submitted:</strong> {selectedPaper.date}</p>
-                <p className="text-gray-600" id="modal-status"><strong>Status:</strong> {selectedPaper.status}</p>
+                <h4 className="text-lg font-semibold mb-3 text-blue-800">Author Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Author's Name:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.studentName || selectedPaper.authors}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Student ID:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.studentId}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Email Address:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Contact Number:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.contactNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Department:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.department}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Batch:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.batch}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Level:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.level}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Semester:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.semester}</p>
+                  </div>
+                </div>
+              </div>
+
+                             {/* University Information */}
+               <div className="mb-6">
+                 <h4 className="text-lg font-semibold mb-3 text-blue-800">University Information</h4>
+                 <div>
+                   <p className="text-gray-600 mb-1"><strong>University Name:</strong></p>
+                   <p className="text-gray-800">{selectedPaper.universityName || selectedPaper.institution || 'HSTU'}</p>
+                 </div>
+               </div>
+
+              {/* Paper Information */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-3 text-blue-800">Paper Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Paper Title:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.paperTitle || selectedPaper.title}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Status:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-1"><strong>Date Submitted:</strong></p>
+                    <p className="text-gray-800">{selectedPaper.date || selectedPaper.submittedDate}</p>
+                  </div>
+                  {selectedPaper.publishedLink && (
+                    <div>
+                      <p className="text-gray-600 mb-1"><strong>Publication Link:</strong></p>
+                      <a href={selectedPaper.publishedLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">
+                        {selectedPaper.publishedLink}
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="mb-6">
@@ -453,72 +604,31 @@ const Papers = () => {
               <div className="mb-6">
                 <h4 className="text-lg font-semibold mb-2">Keywords</h4>
                 <div className="flex flex-wrap gap-2" id="modal-keywords">
-                  {selectedPaper.keywords.map((keyword, index) => (
-                    <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {keyword}
-                    </span>
-                  ))}
+                  {selectedPaper.keywords && selectedPaper.keywords.length > 0 ? (
+                    selectedPaper.keywords.map((keyword, index) => (
+                      <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        {keyword}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No keywords provided</p>
+                  )}
                 </div>
               </div>
               
-              <div className="border-t border-gray-200 pt-6 mb-6">
-                <h4 className="text-lg font-semibold mb-4">Paper Preview</h4>
-                <div className="bg-gray-100 p-6 rounded-lg mb-4 h-96">
-                  <div id="pdf-preview-container" className="h-full w-full">
-                    {selectedPaper.status === "Published" ? (
-                      <div id="pdf-loading" className="h-full flex items-center justify-center">
-                        <div className="text-center">
-                          <i className="fas fa-lock text-gray-500 text-5xl mb-4"></i>
-                          <p className="text-gray-700 font-medium mb-2">This paper is published in IEEE</p>
-                          <p className="text-gray-600 text-sm">Access the full paper through IEEE Xplore</p>
-                          <button
-                            onClick={() => window.open(selectedPaper.ieeeLink, '_blank')}
-                            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                          >
-                            <i className="fas fa-external-link-alt mr-2"></i>View on IEEE
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="h-full w-full">
-                        <iframe
-                          id="pdf-viewer"
-                          src={selectedPaper.pdfUrl}
-                          className="w-full h-full border-0"
-                          title="PDF Preview"
-                          onLoad={() => console.log('PDF loaded successfully')}
-                          onError={() => console.log('PDF failed to load')}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+
               
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                  <span className="text-gray-600 text-sm"><i className="fas fa-eye mr-1"></i> <span id="modal-views">{selectedPaper.views.toLocaleString()}</span> views</span>
-                  <span className="text-gray-600 text-sm ml-4"><i className="fas fa-download mr-1"></i> <span id="modal-downloads">{selectedPaper.downloads}</span> downloads</span>
-                  <span className="text-gray-600 text-sm ml-4"><i className="fas fa-quote-right mr-1"></i> <span id="modal-citations">{selectedPaper.citations}</span> citations</span>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    id="download-pdf-btn"
-                    onClick={handleDownload}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition flex items-center"
-                  >
-                    {selectedPaper.status === "Published" ? (
-                      <>
-                        <i className="fas fa-external-link-alt mr-2"></i> View on IEEE
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-download mr-2"></i> Download PDF
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
+                             <div className="flex justify-end">
+                 {selectedPaper.status === "Published" && (
+                   <button
+                     id="download-pdf-btn"
+                     onClick={handleDownload}
+                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition flex items-center"
+                   >
+                     <i className="fas fa-external-link-alt mr-2"></i> View on IEEE
+                   </button>
+                 )}
+               </div>
             </div>
           </div>
         </div>

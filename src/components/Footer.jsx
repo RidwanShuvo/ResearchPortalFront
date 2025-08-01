@@ -102,7 +102,7 @@ const Footer = () => {
         </div>
         <div className="border-t border-blue-500 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
-            <p>&copy; University Research Portal.</p>
+            <p>&copy; HSTU Research Portal.</p>
           </div>
           <div>
             <ul className="flex space-x-4">

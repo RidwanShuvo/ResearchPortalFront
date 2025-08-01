@@ -547,7 +547,7 @@ const Submit = () => {
             {/* File Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Research Paper (PDF only)
+                Upload Author's HSTU dashboard as a pdf(For Verification)
               </label>
               <div
                 className={`upload-area rounded-lg p-8 text-center cursor-pointer ${dragActive ? 'dragover' : ''}`}
@@ -615,10 +615,10 @@ const Submit = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-6 rounded-md transition"
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Paper'}
-              </button>
+                                 className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-6 rounded-md transition"
+               >
+                 {isSubmitting ? 'Submitting...' : 'Submit'}
+               </button>
             </div>
           </form>
         </section>
