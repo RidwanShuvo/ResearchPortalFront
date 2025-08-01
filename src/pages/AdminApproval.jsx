@@ -57,7 +57,38 @@ const AdminApproval = () => {
       }
     } catch (err) {
       console.error('Fetch error:', err);
-      setPapers([]);
+      
+      // Fallback to localStorage when server is not available
+      try {
+        const localStorageSubmissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
+        const formatted = localStorageSubmissions.map(submission => ({
+          id: submission.id,
+          title: submission.paperTitle || 'Untitled',
+          author: submission.studentName || 'Unknown Author',
+          institution: submission.universityName || 'Unknown Institution',
+          submittedDate: submission.submittedDate ? new Date(submission.submittedDate).toLocaleDateString() : 'Unknown Date',
+          category: submission.department || 'Unknown Department',
+          abstract: submission.abstract || 'No abstract available',
+          keywords: submission.keywords ? submission.keywords.split(',').map(k => k.trim()).filter(k => k) : [],
+          status: submission.submissionStatus === 'pending' ? 'Pending'
+            : submission.submissionStatus === 'approved' ? 'Approved'
+            : submission.submissionStatus === 'rejected' ? 'Rejected'
+            : 'Pending',
+          pdfUrl: submission.pdfUrl || null,
+          email: submission.email || 'No email provided',
+          studentId: submission.studentId || 'No ID provided',
+          contactNumber: submission.contactNumber || 'No contact provided',
+          batch: submission.batch || 'No batch info',
+          level: submission.level || 'No level info',
+          semester: submission.semester || 'No semester info',
+          publicationStatus: submission.status || 'unpublished',
+          publishedLink: submission.publishedLink || null
+        }));
+        setPapers(formatted);
+      } catch (localError) {
+        console.error('LocalStorage error:', localError);
+        setPapers([]);
+      }
     }
     setIsLoading(false);
   };
@@ -117,10 +148,36 @@ const AdminApproval = () => {
 
         console.log(`✅ Updated ${paperId} to ${newStatus}`);
       } else {
-        console.error('❌ Server did not update status');
+        throw new Error('Server did not update status');
       }
     } catch (error) {
-      console.error('❌ Status update failed:', error);
+      console.error('❌ Server status update failed:', error);
+      
+      // Fallback to localStorage update when server is not available
+      try {
+        const submissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
+        const updatedSubmissions = submissions.map(submission => {
+          if (submission.id === paperId) {
+            return {
+              ...submission,
+              submissionStatus: newStatus.toLowerCase()
+            };
+          }
+          return submission;
+        });
+        
+        localStorage.setItem('paperSubmissions', JSON.stringify(updatedSubmissions));
+        
+        // Reload papers from localStorage
+        await loadPapers();
+        
+        // Reset filter so updated list shows properly
+        setSelectedStatus('all');
+        
+        console.log(`✅ Updated ${paperId} to ${newStatus} in localStorage`);
+      } catch (localError) {
+        console.error('❌ LocalStorage status update failed:', localError);
+      }
     }
   };
 
@@ -208,13 +265,13 @@ const AdminApproval = () => {
           <div className="text-center text-gray-500">No papers found.</div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredPapers.map(paper => (
-              <PaperCard
-                key={paper.id}
-                paper={paper}
-                onStatusUpdate={handleStatusUpdate}
-              />
-            ))}
+                         {filteredPapers.map(paper => (
+               <PaperCard
+                 key={paper.id}
+                 paper={paper}
+                 onStatusUpdate={handleStatusUpdate}
+               />
+             ))}
           </div>
         )}
       </section>

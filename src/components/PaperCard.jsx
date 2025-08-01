@@ -8,8 +8,8 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
   const handleStatusUpdate = async (newStatus) => {
     setIsLoading(true);
     try {
-      // Changed here: use paper.id instead of paper._id
-      await onStatusUpdate(paper._id, newStatus);
+      // Use paper.id (which is set in AdminApproval from either _id or localStorage id)
+      await onStatusUpdate(paper.id, newStatus);
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
     } catch (error) {

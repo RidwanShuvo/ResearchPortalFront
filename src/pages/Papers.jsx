@@ -136,11 +136,11 @@ const Papers = () => {
     { value: 'citations', label: 'Most Cited' }
   ]
 
-  useEffect(() => {
+  const loadPapers = () => {
     // Load approved submissions from localStorage
     const submissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
     const approvedSubmissions = submissions
-      .filter(submission => submission.submissionStatus === 'Approved')
+      .filter(submission => submission.submissionStatus === 'approved' || submission.submissionStatus === 'Approved')
       .map(submission => ({
         id: submission.id,
         title: submission.paperTitle,
@@ -166,6 +166,20 @@ const Papers = () => {
     const papersArray = [...Object.values(paperData), ...approvedSubmissions];
     setPapers(papersArray);
     setFilteredPapers(papersArray);
+  };
+
+  useEffect(() => {
+    loadPapers();
+  }, []);
+
+  // Listen for localStorage changes to reload papers when admin approves/rejects
+  useEffect(() => {
+    const handleStorageChange = () => {
+      loadPapers();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   useEffect(() => {
