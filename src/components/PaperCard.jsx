@@ -5,11 +5,11 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
   const [showFullAbstract, setShowFullAbstract] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  const handleStatusUpdate = async (newStatus) => {
+  const handleStatusUpdate = async (newStatus, publicationType = null) => {
     setIsLoading(true);
     try {
       // Use paper.id (which is set in AdminApproval from either _id or localStorage id)
-      await onStatusUpdate(paper.id, newStatus);
+      await onStatusUpdate(paper.id, newStatus, publicationType);
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
     } catch (error) {
@@ -160,18 +160,27 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
       </div>
 
       {paper.status?.toLowerCase() === 'pending' && (
-        <div className="flex space-x-3">
-          <button
-            onClick={() => handleStatusUpdate('Approved')}
-            disabled={isLoading}
-            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {isLoading ? <i className="fas fa-spinner fa-spin"></i> : <><i className="fas fa-check mr-2"></i>Approve</>}
-          </button>
+        <div className="space-y-3">
+          <div className="flex space-x-3">
+            <button
+              onClick={() => handleStatusUpdate('Approved', 'published')}
+              disabled={isLoading}
+              className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {isLoading ? <i className="fas fa-spinner fa-spin"></i> : <><i className="fas fa-check mr-2"></i>Approve as Published</>}
+            </button>
+            <button
+              onClick={() => handleStatusUpdate('Approved', 'unpublished')}
+              disabled={isLoading}
+              className="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {isLoading ? <i className="fas fa-spinner fa-spin"></i> : <><i className="fas fa-clock mr-2"></i>Approve as Unpublished</>}
+            </button>
+          </div>
           <button
             onClick={() => handleStatusUpdate('Rejected')}
             disabled={isLoading}
-            className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isLoading ? <i className="fas fa-spinner fa-spin"></i> : <><i className="fas fa-times mr-2"></i>Reject</>}
           </button>
@@ -183,6 +192,7 @@ const PaperCard = ({ paper, onStatusUpdate }) => {
           <p className="text-green-700 text-sm flex items-center">
             <i className="fas fa-check-circle mr-2"></i>
             This paper has been approved and is now visible to users.
+            {paper.publicationStatus === 'published' ? ' (Published)' : ' (Unpublished)'}
           </p>
         </div>
       )}

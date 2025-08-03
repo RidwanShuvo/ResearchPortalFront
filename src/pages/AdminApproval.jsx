@@ -12,7 +12,8 @@ const AdminApproval = () => {
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
-    approved: 0,
+    published: 0,
+    unpublished: 0,
     rejected: 0
   });
   const navigate = useNavigate();
@@ -27,7 +28,16 @@ const AdminApproval = () => {
       if (response.ok) {
         const serverPapers = await response.json();
         console.log(serverPapers);
-        const formatted = serverPapers.map(paper => ({
+        
+        // Handle the data structure
+        let papersData = [];
+        if (serverPapers.success && serverPapers.data) {
+          papersData = serverPapers.data;
+        } else if (Array.isArray(serverPapers)) {
+          papersData = serverPapers;
+        }
+
+        const formatted = papersData.map(paper => ({
           id: paper._id,
           title: paper.paperTitle || 'Untitled',
           author: paper.studentName || 'Unknown Author',
@@ -37,10 +47,10 @@ const AdminApproval = () => {
           abstract: paper.abstract || 'No abstract available',
           keywords: paper.keywords ? paper.keywords.split(',').map(k => k.trim()).filter(k => k) : [],
           status: paper.submissionStatus === 'pending' ? 'Pending'
-      : paper.submissionStatus === 'approved' ? 'Approved'
-      : paper.submissionStatus === 'rejected' ? 'Rejected'
-      : 'Pending',
-
+            : paper.submissionStatus === 'approved' ? 'Approved'
+            : paper.submissionStatus === 'rejected' ? 'Rejected'
+            : 'Pending',
+          publicationStatus: paper.status || 'unpublished',
           pdfUrl: paper.cloudinaryUrl || null,
           email: paper.email || 'No email provided',
           studentId: paper.studentId || 'No ID provided',
@@ -48,7 +58,6 @@ const AdminApproval = () => {
           batch: paper.batch || 'No batch info',
           level: paper.level || 'No level info',
           semester: paper.semester || 'No semester info',
-          publicationStatus: paper.status || 'unpublished',
           publishedLink: paper.publishedLink || null
         }));
         setPapers(formatted);
@@ -57,38 +66,7 @@ const AdminApproval = () => {
       }
     } catch (err) {
       console.error('Fetch error:', err);
-      
-      // Fallback to localStorage when server is not available
-      try {
-        const localStorageSubmissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
-        const formatted = localStorageSubmissions.map(submission => ({
-          id: submission.id,
-          title: submission.paperTitle || 'Untitled',
-          author: submission.studentName || 'Unknown Author',
-          institution: submission.universityName || 'Unknown Institution',
-          submittedDate: submission.submittedDate ? new Date(submission.submittedDate).toLocaleDateString() : 'Unknown Date',
-          category: submission.department || 'Unknown Department',
-          abstract: submission.abstract || 'No abstract available',
-          keywords: submission.keywords ? submission.keywords.split(',').map(k => k.trim()).filter(k => k) : [],
-          status: submission.submissionStatus === 'pending' ? 'Pending'
-            : submission.submissionStatus === 'approved' ? 'Approved'
-            : submission.submissionStatus === 'rejected' ? 'Rejected'
-            : 'Pending',
-          pdfUrl: submission.pdfUrl || null,
-          email: submission.email || 'No email provided',
-          studentId: submission.studentId || 'No ID provided',
-          contactNumber: submission.contactNumber || 'No contact provided',
-          batch: submission.batch || 'No batch info',
-          level: submission.level || 'No level info',
-          semester: submission.semester || 'No semester info',
-          publicationStatus: submission.status || 'unpublished',
-          publishedLink: submission.publishedLink || null
-        }));
-        setPapers(formatted);
-      } catch (localError) {
-        console.error('LocalStorage error:', localError);
-        setPapers([]);
-      }
+      setPapers([]);
     }
     setIsLoading(false);
   };
@@ -105,7 +83,8 @@ const AdminApproval = () => {
     const newStats = {
       total: papers.length,
       pending: papers.filter(p => p.status?.toLowerCase() === 'pending').length,
-      approved: papers.filter(p => p.status?.toLowerCase() === 'approved').length,
+      published: papers.filter(p => p.publicationStatus === 'published').length,
+      unpublished: papers.filter(p => p.publicationStatus === 'unpublished').length,
       rejected: papers.filter(p => p.status?.toLowerCase() === 'rejected').length
     };
     setStats(newStats);
@@ -113,9 +92,15 @@ const AdminApproval = () => {
     let filtered = papers;
 
     if (selectedStatus !== 'all') {
-      filtered = filtered.filter(paper =>
-        paper.status?.toLowerCase() === selectedStatus.toLowerCase()
-      );
+      if (selectedStatus === 'Published') {
+        filtered = filtered.filter(paper => paper.publicationStatus === 'published');
+      } else if (selectedStatus === 'Unpublished') {
+        filtered = filtered.filter(paper => paper.publicationStatus === 'unpublished');
+      } else {
+        filtered = filtered.filter(paper =>
+          paper.status?.toLowerCase() === selectedStatus.toLowerCase()
+        );
+      }
     }
 
     if (searchTerm) {
@@ -128,15 +113,23 @@ const AdminApproval = () => {
 
     setFilteredPapers(filtered);
   }, [papers, selectedStatus, searchTerm]);
-  // Updated Status update function:
-  const handleStatusUpdate = async (paperId, newStatus) => {
+
+  // Updated Status update function with publication type:
+  const handleStatusUpdate = async (paperId, newStatus, publicationType = null) => {
     try {
+      const requestBody = { status: newStatus.toLowerCase() };
+      
+      // Add publicationType for approved papers
+      if (newStatus.toLowerCase() === 'approved' && publicationType) {
+        requestBody.publicationType = publicationType;
+      }
+
       const response = await fetch(`http://localhost:5000/api/papers/${paperId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus.toLowerCase() }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
@@ -146,38 +139,12 @@ const AdminApproval = () => {
         // Reset filter so updated list shows properly
         setSelectedStatus('all');
 
-        console.log(`✅ Updated ${paperId} to ${newStatus}`);
+        console.log(`✅ Updated ${paperId} to ${newStatus}${publicationType ? ` (${publicationType})` : ''}`);
       } else {
-        throw new Error('Server did not update status');
+        console.error('❌ Server did not update status');
       }
     } catch (error) {
-      console.error('❌ Server status update failed:', error);
-      
-      // Fallback to localStorage update when server is not available
-      try {
-        const submissions = JSON.parse(localStorage.getItem('paperSubmissions') || '[]');
-        const updatedSubmissions = submissions.map(submission => {
-          if (submission.id === paperId) {
-            return {
-              ...submission,
-              submissionStatus: newStatus.toLowerCase()
-            };
-          }
-          return submission;
-        });
-        
-        localStorage.setItem('paperSubmissions', JSON.stringify(updatedSubmissions));
-        
-        // Reload papers from localStorage
-        await loadPapers();
-        
-        // Reset filter so updated list shows properly
-        setSelectedStatus('all');
-        
-        console.log(`✅ Updated ${paperId} to ${newStatus} in localStorage`);
-      } catch (localError) {
-        console.error('❌ LocalStorage status update failed:', localError);
-      }
+      console.error('❌ Status update failed:', error);
     }
   };
 
@@ -228,14 +195,15 @@ const AdminApproval = () => {
       <section className="bg-white border-b">
         <div className="container mx-auto px-6 py-4 flex flex-wrap justify-between gap-4">
           <div className="flex gap-2 flex-wrap">
-            {['all', 'Pending', 'Approved', 'Rejected'].map(status => (
+            {['all', 'Pending', 'Published', 'Unpublished', 'Rejected'].map(status => (
               <button
                 key={status}
                 onClick={() => setSelectedStatus(status)}
                 className={`px-4 py-2 rounded-md text-sm font-medium ${
                   selectedStatus === status
                     ? status === 'Pending' ? 'bg-yellow-600 text-white'
-                    : status === 'Approved' ? 'bg-green-600 text-white'
+                    : status === 'Published' ? 'bg-green-600 text-white'
+                    : status === 'Unpublished' ? 'bg-orange-600 text-white'
                     : status === 'Rejected' ? 'bg-red-600 text-white'
                     : 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -265,13 +233,13 @@ const AdminApproval = () => {
           <div className="text-center text-gray-500">No papers found.</div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                         {filteredPapers.map(paper => (
-               <PaperCard
-                 key={paper.id}
-                 paper={paper}
-                 onStatusUpdate={handleStatusUpdate}
-               />
-             ))}
+            {filteredPapers.map(paper => (
+              <PaperCard
+                key={paper.id}
+                paper={paper}
+                onStatusUpdate={handleStatusUpdate}
+              />
+            ))}
           </div>
         )}
       </section>
