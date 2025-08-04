@@ -10,6 +10,8 @@ const Papers = () => {
   const [selectedPaper, setSelectedPaper] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [adminData, setAdminData] = useState(null)
+  const [isLoadingAdminData, setIsLoadingAdminData] = useState(false)
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -278,14 +280,38 @@ const Papers = () => {
     setCurrentSort(e.target.value)
   }
 
-  const handlePaperClick = (paper) => {
+  const fetchAdminData = async (paperId) => {
+    setIsLoadingAdminData(true)
+    try {
+      const response = await fetch(`http://localhost:5000/api/papers/${paperId}`)
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success && result.data) {
+          setAdminData(result.data)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching admin data:', error)
+    } finally {
+      setIsLoadingAdminData(false)
+    }
+  }
+
+  const handlePaperClick = async (paper) => {
     setSelectedPaper(paper)
     setShowModal(true)
+    setAdminData(null) // Reset admin data
+    
+    // Fetch admin data if paper has an ID (from server)
+    if (paper.id && typeof paper.id === 'string' && paper.id.length > 10) {
+      await fetchAdminData(paper.id)
+    }
   }
 
   const closeModal = () => {
     setShowModal(false)
     setSelectedPaper(null)
+    setAdminData(null)
   }
 
   const handleDownload = () => {
@@ -575,6 +601,157 @@ const Papers = () => {
                 </div>
               </div>
 
+              {/* Admin Data Section */}
+              {isLoadingAdminData && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-center py-4">
+                    <i className="fas fa-spinner fa-spin text-blue-600 text-xl mr-2"></i>
+                    <span className="text-gray-600">Loading admin information...</span>
+                  </div>
+                </div>
+              )}
+
+              {adminData && !isLoadingAdminData && (
+                <div className="mb-6 border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i className="fas fa-user-shield mr-2 text-blue-600"></i>
+                    Author's Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Submission Details */}
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-700 border-b pb-2">Submission Details</h4>
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">Student ID:</span>
+                          <span className="ml-2 text-gray-800">{adminData.studentId || 'Not provided'}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">Email:</span>
+                          <span className="ml-2 text-gray-800">{adminData.email || 'Not provided'}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">Contact:</span>
+                          <span className="ml-2 text-gray-800">{adminData.contactNumber || 'Not provided'}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">Department:</span>
+                          <span className="ml-2 text-gray-800">{adminData.department || 'Not specified'}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Academic Details */}
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-700 border-b pb-2">Academic Details</h4>
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">Batch:</span>
+                          <span className="ml-2 text-gray-800">{adminData.batch || 'Not specified'}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">Level:</span>
+                          <span className="ml-2 text-gray-800">{adminData.level || 'Not specified'}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">Semester:</span>
+                          <span className="ml-2 text-gray-800">{adminData.semester || 'Not specified'}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium text-gray-600">University:</span>
+                          <span className="ml-2 text-gray-800">{adminData.universityName || 'Not specified'}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Approval Status */}
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-3">Approval Status</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          adminData.submissionStatus === 'approved' 
+                            ? 'bg-green-100 text-green-800' 
+                            : adminData.submissionStatus === 'rejected'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          <i className={`fas ${
+                            adminData.submissionStatus === 'approved' ? 'fa-check-circle' :
+                            adminData.submissionStatus === 'rejected' ? 'fa-times-circle' :
+                            'fa-clock'
+                          } mr-1`}></i>
+                          {adminData.submissionStatus ? adminData.submissionStatus.charAt(0).toUpperCase() + adminData.submissionStatus.slice(1) : 'Pending'}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Submission Status</p>
+                      </div>
+                      
+                      <div className="text-center">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          adminData.status === 'published' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          <i className={`fas ${
+                            adminData.status === 'published' ? 'fa-globe' : 'fa-file-alt'
+                          } mr-1`}></i>
+                          {adminData.status === 'published' ? 'Published' : 'Unpublished'}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Publication Status</p>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600">
+                          <i className="fas fa-calendar mr-1"></i>
+                          {adminData.submittedAt ? new Date(adminData.submittedAt).toLocaleDateString() : 'Unknown'}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Submitted Date</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Admin Notes or Comments */}
+                  {adminData.adminNotes && (
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                        <i className="fas fa-sticky-note mr-2 text-blue-600"></i>
+                        Admin Notes
+                      </h4>
+                      <p className="text-sm text-gray-700">{adminData.adminNotes}</p>
+                    </div>
+                  )}
+
+                  {/* Published Link */}
+                  {adminData.publishedLink && (
+                    <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <h4 className="font-medium text-gray-700 mb-2 flex items-center">
+                        <i className="fas fa-external-link-alt mr-2 text-green-600"></i>
+                        Publication Link
+                      </h4>
+                      <a 
+                        href={adminData.publishedLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm break-all"
+                      >
+                        {adminData.publishedLink}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Fallback message when no admin data is available */}
+              {!adminData && !isLoadingAdminData && selectedPaper && selectedPaper.id && typeof selectedPaper.id === 'string' && selectedPaper.id.length > 10 && (
+                <div className="mb-6 border-t pt-6">
+                  <div className="text-center py-4">
+                    <i className="fas fa-info-circle text-gray-400 text-xl mb-2"></i>
+                    <p className="text-gray-500 text-sm">Admin information not available for this paper.</p>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-end space-x-4">
                 {selectedPaper.pdfUrl && (
