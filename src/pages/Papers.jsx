@@ -20,84 +20,84 @@ const Papers = () => {
 
   // Paper data matching the original HTML exactly
   const paperData = {
-    1: {
-      id: 1,
-      title: "Advances in Gene Therapy for Rare Diseases",
-      authors: "Dr. Fatima Rahman (Department of Genetic Engineering, DU), Dr. Arif Hassan (Bangabandhu Sheikh Mujib Medical University), Dr.Nusrat Jahan (Sylhet MAG Osmani Medical College)",
-      institution: "Chittagong Medical College",
-      date: "June 15, 2025",
-      status: "Published",
-      category: "biology",
-      abstract: "A groundbreaking study on novel gene therapy approaches for treating rare genetic disorders, focusing on delivery mechanisms and clinical outcomes.",
-      keywords: ["Gene Therapy", "Rare Diseases", "Clinical Trials"],
-      pdfUrl: "/pdf/Myinfo-HSTU.pdf",
-      ieeeLink: "https://ieeexplore.ieee.org/document/8660780"
-    },
-    2: {
-      id: 2,
-      title: "Advancing Exchange Rate Forecasting: Leveraging Machine Learning and AI for Enhanced Accuracy in Global Financial Markets",
-      authors: "Md. Yeasin Rahat, Rajan Das Gupta, Nur Raisa Rahman, Sudipto Roy Pritom, Samiur Rahman Shakir, Md Imrul Hasan Showmick, Md. Jakir Hossen",
-      institution: "American International University-Bangladesh, Dhaka, Bangladesh",
-      date: "11 June, 2025",
-      status: "Unpublished",
-      category: "statistical-finance",
-      abstract: "The prediction of foreign exchange rates, such as the US Dollar (USD) to Bangladeshi Taka (BDT), plays a pivotal role in global financial markets, influencing trade, investments, and economic stability. This study leverages historical USD/BDT exchange rate data from 2018 to 2023, sourced from Yahoo Finance, to develop advanced machine learning models for accurate forecasting. A Long Short-Term Memory (LSTM) neural network is employed, achieving an exceptional accuracy of 99.449%, a Root Mean Square Error (RMSE) of 0.9858, and a test loss of 0.8523, significantly outperforming traditional methods like ARIMA (RMSE 1.342). Additionally, a Gradient Boosting Classifier (GBC) is applied for directional prediction, with backtesting on a 20,653.25 over 49 trades. The study analyzes historical trends, showing a decline in BDT/USD rates from 0.012 to 0.009, and incorporates normalized daily returns to capture volatility. These findings highlight the potential of deep learning in forex forecasting, offering traders and policymakers robust tools to mitigate risks. Future work could integrate sentiment analysis and real-time economic indicators to further enhance model adaptability in volatile markets.",
-      keywords: ["Exchange Rate Forecasting", "Machine Learning", "AI"],
+    // 1: {
+    //   id: 1,
+    //   title: "Advances in Gene Therapy for Rare Diseases",
+    //   authors: "Dr. Fatima Rahman (Department of Genetic Engineering, DU), Dr. Arif Hassan (Bangabandhu Sheikh Mujib Medical University), Dr.Nusrat Jahan (Sylhet MAG Osmani Medical College)",
+    //   institution: "Chittagong Medical College",
+    //   date: "June 15, 2025",
+    //   status: "Published",
+    //   category: "biology",
+    //   abstract: "A groundbreaking study on novel gene therapy approaches for treating rare genetic disorders, focusing on delivery mechanisms and clinical outcomes.",
+    //   keywords: ["Gene Therapy", "Rare Diseases", "Clinical Trials"],
+    //   pdfUrl: "/pdf/Myinfo-HSTU.pdf",
+    //   ieeeLink: "https://ieeexplore.ieee.org/document/8660780"
+    // },
+    // 2: {
+    //   id: 2,
+    //   title: "Advancing Exchange Rate Forecasting: Leveraging Machine Learning and AI for Enhanced Accuracy in Global Financial Markets",
+    //   authors: "Md. Yeasin Rahat, Rajan Das Gupta, Nur Raisa Rahman, Sudipto Roy Pritom, Samiur Rahman Shakir, Md Imrul Hasan Showmick, Md. Jakir Hossen",
+    //   institution: "American International University-Bangladesh, Dhaka, Bangladesh",
+    //   date: "11 June, 2025",
+    //   status: "Unpublished",
+    //   category: "statistical-finance",
+    //   abstract: "The prediction of foreign exchange rates, such as the US Dollar (USD) to Bangladeshi Taka (BDT), plays a pivotal role in global financial markets, influencing trade, investments, and economic stability. This study leverages historical USD/BDT exchange rate data from 2018 to 2023, sourced from Yahoo Finance, to develop advanced machine learning models for accurate forecasting. A Long Short-Term Memory (LSTM) neural network is employed, achieving an exceptional accuracy of 99.449%, a Root Mean Square Error (RMSE) of 0.9858, and a test loss of 0.8523, significantly outperforming traditional methods like ARIMA (RMSE 1.342). Additionally, a Gradient Boosting Classifier (GBC) is applied for directional prediction, with backtesting on a 20,653.25 over 49 trades. The study analyzes historical trends, showing a decline in BDT/USD rates from 0.012 to 0.009, and incorporates normalized daily returns to capture volatility. These findings highlight the potential of deep learning in forex forecasting, offering traders and policymakers robust tools to mitigate risks. Future work could integrate sentiment analysis and real-time economic indicators to further enhance model adaptability in volatile markets.",
+    //   keywords: ["Exchange Rate Forecasting", "Machine Learning", "AI"],
       
-      pdfUrl: "/pdf/advancingExchange.pdf"
-    },
-    3: {
-      id: 3,
-      title: "The Impact of Social Media on Mental Health",
-      authors: "Dr. Mohammad Ali (Bangabandhu Sheikh Mujibur Rahman Agricultural University), Prof. Salma Begum (Khulna University), Dr. Anika Tabassum (Patuakhali Science and Technology University)",
-      institution: "Stanford University",
-      date: "May 22, 2023",
-      status: "Published",
-      category: "social-sciences",
-      abstract: "A comprehensive analysis of how social media usage affects psychological well-being, with a focus on adolescents and young adults.",
-      keywords: ["Social Media", "Mental Health", "Psychology"],
-      pdfUrl: "/sample-pdfs/paper3.pdf",
-      ieeeLink: "https://ieeexplore.ieee.org/document/example2"
-    },
-    4: {
-      id: 4,
-      title: "Cultural Impact on Requirements Engineering Activities: Bangladeshi Practitioners' View",
-      authors: "Chowdhury Shahriar Muzammel, Maria Spichkova, James Harland",
-      institution: "RMIT University, Australia",
-      date: "20 July, 2025",
-      status: "Unpublished",
-      category: "computer-science",
-      abstract: "Requirements Engineering (RE) is one of the most interaction-intensive phases of software development. This means that RE activities might be especially impacted by stakeholders' national culture. Software development projects increasingly have a very diverse range of stakeholders. To future-proof RE activities, we need to help RE practitioners avoid misunderstandings and conflicts that might arise from not understanding potential Cultural Influences (CIs). Moreover, an awareness of CIs supports diversity and inclusion in the IT profession. Bangladesh has a growing IT sector with some unique socio-cultural characteristics, and has been largely overlooked in this research field. In this study, we aim to investigate how the RE process is adopted in the context of Bangladeshi culture and what cultural influences impact overall RE activities.",
-      keywords: ["Cultural Influences", "Requirements Engineering", "Bangladesh Software Industry"],
+    //   pdfUrl: "/pdf/advancingExchange.pdf"
+    // },
+    // 3: {
+    //   id: 3,
+    //   title: "The Impact of Social Media on Mental Health",
+    //   authors: "Dr. Mohammad Ali (Bangabandhu Sheikh Mujibur Rahman Agricultural University), Prof. Salma Begum (Khulna University), Dr. Anika Tabassum (Patuakhali Science and Technology University)",
+    //   institution: "Stanford University",
+    //   date: "May 22, 2023",
+    //   status: "Published",
+    //   category: "social-sciences",
+    //   abstract: "A comprehensive analysis of how social media usage affects psychological well-being, with a focus on adolescents and young adults.",
+    //   keywords: ["Social Media", "Mental Health", "Psychology"],
+    //   pdfUrl: "/sample-pdfs/paper3.pdf",
+    //   ieeeLink: "https://ieeexplore.ieee.org/document/example2"
+    // },
+    // 4: {
+    //   id: 4,
+    //   title: "Cultural Impact on Requirements Engineering Activities: Bangladeshi Practitioners' View",
+    //   authors: "Chowdhury Shahriar Muzammel, Maria Spichkova, James Harland",
+    //   institution: "RMIT University, Australia",
+    //   date: "20 July, 2025",
+    //   status: "Unpublished",
+    //   category: "computer-science",
+    //   abstract: "Requirements Engineering (RE) is one of the most interaction-intensive phases of software development. This means that RE activities might be especially impacted by stakeholders' national culture. Software development projects increasingly have a very diverse range of stakeholders. To future-proof RE activities, we need to help RE practitioners avoid misunderstandings and conflicts that might arise from not understanding potential Cultural Influences (CIs). Moreover, an awareness of CIs supports diversity and inclusion in the IT profession. Bangladesh has a growing IT sector with some unique socio-cultural characteristics, and has been largely overlooked in this research field. In this study, we aim to investigate how the RE process is adopted in the context of Bangladeshi culture and what cultural influences impact overall RE activities.",
+    //   keywords: ["Cultural Influences", "Requirements Engineering", "Bangladesh Software Industry"],
       
-      pdfUrl: "/pdf/cultural.pdf"
-    },
-    5: {
-      id: 5,
-      title: "Implementing AI in Bangladeshi Healthcare: Challenges & Opportunities",
-      authors: "Dr. Sabrina Ahmed (DU), Dr. Rashed Khan (MIST)",
-      institution: "Dhaka University Computer Science Department",
-      date: "April 5, 2023",
-      status: "Published",
-      category: "computer-science",
-      abstract: "Case studies from Bangabandhu Sheikh Mujib Medical University on implementing AI diagnostic tools in resource-constrained settings, addressing data scarcity and cultural acceptance.",
-      keywords: ["AI Implementation", "Global South", "Medical Ethics"],
-      pdfUrl: "/sample-pdfs/paper5.pdf",
-      ieeeLink: "https://ieeexplore.ieee.org/document/example3"
-    },
-    6: {
-      id: 6,
-      title: "Motamot: A Dataset for Revealing the Supremacy of Large Language Models over Transformer Models in Bengali Political Sentiment Analysis",
-      authors: "Fatema Tuj Johora Faria, Mukaffi Bin Moin, Rabeya Islam Mumu, Md Mahabubul Alam Abir, Abrar Nawar Alfy, Mohammad Shafiul Alam",
-      institution: "Bangladesh University of Engineering and Technology",
-      date: "15 August, 2025",
-      status: "Unpublished",
-      category: "computer-science",
-      abstract: "This study introduces Motamot, a comprehensive dataset for Bengali political sentiment analysis, demonstrating the superior performance of Large Language Models (LLMs) over traditional Transformer models. The research addresses the scarcity of high-quality Bengali language resources for sentiment analysis in political contexts.",
-      keywords: ["Bengali NLP", "Sentiment Analysis", "Large Language Models"],
+    //   pdfUrl: "/pdf/cultural.pdf"
+    // },
+    // 5: {
+    //   id: 5,
+    //   title: "Implementing AI in Bangladeshi Healthcare: Challenges & Opportunities",
+    //   authors: "Dr. Sabrina Ahmed (DU), Dr. Rashed Khan (MIST)",
+    //   institution: "Dhaka University Computer Science Department",
+    //   date: "April 5, 2023",
+    //   status: "Published",
+    //   category: "computer-science",
+    //   abstract: "Case studies from Bangabandhu Sheikh Mujib Medical University on implementing AI diagnostic tools in resource-constrained settings, addressing data scarcity and cultural acceptance.",
+    //   keywords: ["AI Implementation", "Global South", "Medical Ethics"],
+    //   pdfUrl: "/sample-pdfs/paper5.pdf",
+    //   ieeeLink: "https://ieeexplore.ieee.org/document/example3"
+    // },
+    // 6: {
+    //   id: 6,
+    //   title: "Motamot: A Dataset for Revealing the Supremacy of Large Language Models over Transformer Models in Bengali Political Sentiment Analysis",
+    //   authors: "Fatema Tuj Johora Faria, Mukaffi Bin Moin, Rabeya Islam Mumu, Md Mahabubul Alam Abir, Abrar Nawar Alfy, Mohammad Shafiul Alam",
+    //   institution: "Bangladesh University of Engineering and Technology",
+    //   date: "15 August, 2025",
+    //   status: "Unpublished",
+    //   category: "computer-science",
+    //   abstract: "This study introduces Motamot, a comprehensive dataset for Bengali political sentiment analysis, demonstrating the superior performance of Large Language Models (LLMs) over traditional Transformer models. The research addresses the scarcity of high-quality Bengali language resources for sentiment analysis in political contexts.",
+    //   keywords: ["Bengali NLP", "Sentiment Analysis", "Large Language Models"],
       
-      pdfUrl: "/pdf/motamot.pdf"
-    }
+    //   pdfUrl: "/pdf/motamot.pdf"
+    // }
   }
 
   const sortOptions = [
