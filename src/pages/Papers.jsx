@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { API_ENDPOINTS } from '../config/api'
 
 const Papers = () => {
   const [papers, setPapers] = useState([])
@@ -29,7 +30,7 @@ const Papers = () => {
       category: "biology",
       abstract: "A groundbreaking study on novel gene therapy approaches for treating rare genetic disorders, focusing on delivery mechanisms and clinical outcomes.",
       keywords: ["Gene Therapy", "Rare Diseases", "Clinical Trials"],
-      pdfUrl: "http://localhost:5000/uploads/Myinfo-HSTU.pdf",
+      pdfUrl: "/pdf/Myinfo-HSTU.pdf",
       ieeeLink: "https://ieeexplore.ieee.org/document/8660780"
     },
     2: {
@@ -111,7 +112,7 @@ const Papers = () => {
     setIsLoading(true);
     try {
       // Fetch papers from backend API
-      const response = await fetch('http://localhost:5000/api/papers');
+      const response = await fetch(API_ENDPOINTS.PAPERS);
       if (response.ok) {
         const serverPapers = await response.json();
         console.log('Fetched papers from backend:', serverPapers);
@@ -283,7 +284,7 @@ const Papers = () => {
   const fetchAdminData = async (paperId) => {
     setIsLoadingAdminData(true)
     try {
-      const response = await fetch(`http://localhost:5000/api/papers/${paperId}`)
+      const response = await fetch(`${API_ENDPOINTS.PAPERS}/${paperId}`)
       if (response.ok) {
         const result = await response.json()
         if (result.success && result.data) {

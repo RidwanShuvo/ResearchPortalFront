@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AdminContext';
 import PaperCard from '../components/PaperCard';
+import { API_ENDPOINTS } from '../config/api';
 
 const AdminApproval = () => {
   const [papers, setPapers] = useState([]);
@@ -22,7 +23,7 @@ const AdminApproval = () => {
   const loadPapers = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/papers', {
+      const response = await fetch(API_ENDPOINTS.PAPERS, {
         credentials: 'include',
       });
       if (response.ok) {
@@ -124,7 +125,7 @@ const AdminApproval = () => {
         requestBody.publicationType = publicationType;
       }
 
-      const response = await fetch(`http://localhost:5000/api/papers/${paperId}/status`, {
+      const response = await fetch(`${API_ENDPOINTS.PAPERS}/${paperId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { API_ENDPOINTS } from '../config/api'
 
 const Submit = () => {
   const [formData, setFormData] = useState({
@@ -178,7 +179,7 @@ const Submit = () => {
         formDataToSend.append('publishedLink', publishedLink)
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/submit`, {
+      const response = await fetch(API_ENDPOINTS.SUBMIT, {
         method: 'POST',
         body: formDataToSend
       })
