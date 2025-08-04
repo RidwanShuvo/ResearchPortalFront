@@ -123,7 +123,7 @@ const AdminLogin = ({ isOpen, onClose, onLoginSuccess }) => {
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-md">
+{/*         <div className="mt-6 p-4 bg-gray-50 rounded-md">
           <p className="text-sm text-gray-600 mb-2">
             <strong>Demo Credentials:</strong>
           </p>
@@ -133,7 +133,7 @@ const AdminLogin = ({ isOpen, onClose, onLoginSuccess }) => {
           <p className="text-sm text-gray-500">
             Password: <code className="bg-gray-200 px-1 rounded">admin123</code>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
