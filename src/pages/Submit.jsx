@@ -178,7 +178,7 @@ const Submit = () => {
         formDataToSend.append('publishedLink', publishedLink)
       }
 
-      const response = await fetch('http://localhost:5000/api/submit', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/submit`, {
         method: 'POST',
         body: formDataToSend
       })
