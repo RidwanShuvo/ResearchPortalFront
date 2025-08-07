@@ -634,7 +634,7 @@ const Submit = () => {
             <li>The abstract should be concise and not exceed 300 words.</li>
             <li>Include 3-5 keywords that best represent your research.</li>
             <li>Ensure your paper follows the university's formatting guidelines.</li>
-            <li>Submission deadline: <span className="font-medium">May 15, 2023, 11:59 PM</span></li>
+{/*             <li>Submission deadline: <span className="font-medium">May 15, 2023, 11:59 PM</span></li> */}
           </ul>
         </section>
       </div>
