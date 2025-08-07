@@ -410,8 +410,8 @@ const Papers = () => {
                   className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Categories</option>
-                  <option value="computer-science">Computer Science</option>
-                  <option value="biology">Biology</option>
+                  <option value="computer-science">Computer Science and Engineering</option>
+                  <option value="biology">Agriculture</option>
                   <option value="social-sciences">Social Sciences</option>
                   <option value="statistical-finance">Statistical Finance</option>
                 </select>
